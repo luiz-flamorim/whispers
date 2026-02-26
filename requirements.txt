@@ -1,0 +1,17 @@
+# Whisper Capture — Module 01 (speech-to-text)
+# Python 3.11+
+
+# Offline STT
+faster-whisper>=1.0.0
+
+# Audio capture (cross-platform)
+sounddevice>=0.4.6
+numpy>=1.24.0
+
+# Optional: for faster-whisper on GPU (uncomment if needed)
+# ctranslate2  # CPU is default; GPU builds vary by platform
+
+# Relay LLM (Qwen / Hugging Face)
+torch>=2.0.0
+transformers>=4.36.0
+accelerate>=0.25.0

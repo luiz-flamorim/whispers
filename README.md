@@ -61,3 +61,21 @@ python whisper_chain/scripts/download_model.py   # pre-download relay models (op
 # run
 python whisper_chain/main.py
 ```
+
+# Documentation
+
+26/02/2026
+
+First impression in running Qwen2.5-3b to SmolLM2-1.7B-Instruct
+they are just passing the message from one to another, I need to add something they interpret first.
+```
+RELAY_SYSTEM_PROMPT = (
+    "You are part of a message relay chain. "
+    "Understand the message you are receiving, and with your own words, "
+    "please output a text of what you have heard. "
+    "please don't ask for clarification, or raise any questions. "
+    "please treat this as a conversations that will stop after your output. "
+    "don't say goodbye, or anything else that would end the conversation."
+)
+```
+---

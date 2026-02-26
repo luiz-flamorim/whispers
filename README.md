@@ -2,22 +2,28 @@
 
 An experimentation in the whispering game: you speak into the microphone; the app transcribes your speech and runs it through a chain of LLM relays. Each relay receives the previous output and responds in its own words. This is the MVP with one speech capture step and two relays.
 
----
 
 ## Voice capture (speech-to-text)
+
+### Configuration
+
+- **STT (recording & Whisper):** edit `src/stt.py` — `RECORD_SECONDS`, `SAMPLE_RATE`, `INPUT_DEVICE`, `WHISPER_MODEL_SIZE`, `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE`.
+- **Relays:** edit the relay modules in `src/` — `MODEL_NAME`, `MAX_NEW_TOKENS`, `TEMPERATURE`.
+- **Chain order and shared prompt:** edit `src/main.py` — `RELAY_SYSTEM_PROMPT` and the `RELAYS` list.
+
+### Voice capture
 
 Voice is captured and turned into text **without using an LLM**:
 
 1. **Recording** — I use the **sounddevice** library to read from the default microphone and write a short WAV file. It’s a thin wrapper around PortAudio (cross-platform). No AI here; it’s just audio I/O.
 2. **Transcription** — I use **faster-whisper** to turn that WAV into text. faster-whisper is a Python library that runs OpenAI’s Whisper model locally via CTranslate2. Whisper is a **speech-recognition model** (audio → text), not a chat/LLM. Everything runs on your machine; no cloud API is called.
 
-So: **sounddevice** = capture from mic; **faster-whisper** = offline speech-to-text. The resulting text is then passed to the first relay in the chain.
+**sounddevice** = capture from mic; **faster-whisper** = offline speech-to-text. The resulting text is then passed to the first relay in the chain.
 
 - sounddevice: https://python-sounddevice.readthedocs.io/
 - faster-whisper: https://github.com/SYSTRAN/faster-whisper
 - Whisper (OpenAI): https://github.com/openai/whisper
 
----
 
 ## Relays (LLMs)
 
@@ -38,52 +44,20 @@ Relays are **instruction-tuned language models** run locally with **Hugging Face
 
 Ungated: no login required to download.
 
----
-
-## Requirements
-
-- Python 3.11+
-- Microphone and permission for the app to use it
-- Enough disk space for Whisper (e.g. ~1–2 GB for the default “base” model) and the relay models (several GB total)
-
----
 
 ## Setup
 
 From the project root (e.g. `Wishpers`):
 
 ```bash
+ # Windows PowerShell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1   # Windows PowerShell
+.\.venv\Scripts\Activate.ps1  
 # or: source .venv/bin/activate  # macOS/Linux
 
 pip install -r whisper_chain/requirements.txt
 python whisper_chain/scripts/download_model.py   # pre-download relay models (optional but recommended)
+
+# run
+python whisper_chain/main.py
 ```
-
-**Linux:** If sounddevice fails, install PortAudio, e.g.  
-`sudo apt install libportaudio2 portaudio19-dev` (Debian/Ubuntu).
-
----
-
-## Run
-
-```bash
-python whisper_chain/src/main.py
-```
-
-When you see “Ready. Speak now…”, speak for the configured duration (default 8 s). The app will print the transcript and each relay’s output.
-
----
-
-## Configuration
-
-- **STT (recording & Whisper):** edit `src/stt.py` — `RECORD_SECONDS`, `SAMPLE_RATE`, `INPUT_DEVICE`, `WHISPER_MODEL_SIZE`, `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE`.
-- **Relays:** edit the relay modules in `src/` — `MODEL_NAME`, `MAX_NEW_TOKENS`, `TEMPERATURE`.
-- **Chain order and shared prompt:** edit `src/main.py` — `RELAY_SYSTEM_PROMPT` and the `RELAYS` list.
-
----
-
-## Output
-
-Plain text only: transcript, then each relay’s reply, one after the other. No timestamps or extra formatting.

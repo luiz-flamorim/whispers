@@ -44,6 +44,14 @@ Relays are **instruction-tuned language models** run locally with **Hugging Face
 
 Ungated: no login required to download.
 
+### relay_03_tinyllama
+
+- **Model:** TinyLlama-1.1B-Chat-v1.0 (TinyLlama).
+- **Hugging Face:** https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0  
+- **Transformers:** https://huggingface.co/docs/transformers  
+
+Ungated (Apache 2.0); no login required. ~1.1B parameters, good as a third hop to keep the chain light.
+
 
 ## Setup
 
@@ -62,9 +70,28 @@ python whisper_chain/scripts/download_model.py   # pre-download relay models (op
 python whisper_chain/main.py
 ```
 
-# Documentation
+# Journal
 
-26/02/2026
+### 02/03/2026
+
+Amended the prompt and added tinyLlama
+```bash
+RELAY_SYSTEM_PROMPT = (
+    "You are part of a message relay chain. "
+    "Understand the message you are receiving, and with your own words, output a text of what you have heard."
+    "please don't ask for clarification, or raise any questions. "
+    "don't say goodbye, or anything else that would end the conversation."
+)
+```
+```
+TRANSCRIPT:
+I would like to know more about Maths
+### relay_01_qwen: Claro, eu também gosto de matemática. Gostaria de saber se você tem um tópico específico em mente para explorar ou se você quer uma introdução geral à matemática?
+### relay_02_smol: Sure, I also like mathematics. Would you like to know if they have a specific topic in mind to explore or if they want a general introduction to mathematics?
+### relay_03_tinyllama: I don't have access to the specific topic or intent of the person you're asking about. However, in general, if they have a specific topic in mind, you can ask them about it and provide a brief explanation or example. If they're interested in a general introduction to mathematics, you could start by asking them if they have any specific questions or areas they're interested in learning more about. Then, you can provide a brief overview of what mathematics is and how it's used in everyday life.
+```
+
+### 26/02/2026
 
 First impression in running Qwen2.5-3b to SmolLM2-1.7B-Instruct
 they are just passing the message from one to another, I need to add something they interpret first.

@@ -73,7 +73,7 @@ python whisper_chain/main.py
 # Journal
 
 ### 05/03/2026
-I have noticed that when the LLM is greeted with "Hello" or something else, it tends to responde to the greeting rather than understand and pass the message. I am adding details to the prompt to prevent it. I am also limiting the number of tokens from Tiny Llama to 30.
+I have noticed that when the LLM is greeted with "Hello" or something else, it tends to responde to the greeting rather than understand and pass the message. I am adding details to the prompt to prevent it. I am also limiting the number of tokens from Tiny Llama to 30. I have notice a language switch when reducing the tokens from Llama, which needs to be fixed.
 
 ```bash
 RELAY_SYSTEM_PROMPT = (

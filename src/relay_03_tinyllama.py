@@ -3,7 +3,7 @@
 MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Ungated; no HF login required
 INPUT_TEXT = "Replace this with the transcript coming from your STT module."
 
-MAX_NEW_TOKENS = 200
+MAX_NEW_TOKENS = 30
 TEMPERATURE = 0.7
 
 

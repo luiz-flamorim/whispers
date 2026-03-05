@@ -72,6 +72,22 @@ python whisper_chain/main.py
 
 # Journal
 
+### 05/03/2026
+I have noticed that when the LLM is greeted with "Hello" or something else, it tends to responde to the greeting rather than understand and pass the message. I am adding details to the prompt to prevent it. I am also limiting the number of tokens from Tiny Llama to 30.
+
+```bash
+RELAY_SYSTEM_PROMPT = (
+    "You are part of a message relay chain. Your only job is to understand what was said and, in your own words, output a short rephrase of that message for the next relay. Do not reply to the message as if in a conversation—only pass it on. If the message is a greeting (e.g. 'Hello'), a thanks, or another short phrase, still pass it as content (e.g. 'Someone said hello'). Do not ask for clarification, do not ask questions, and do not say goodbye or anything that would end the conversation. Keep your output to one short sentence when possible. Reply in the same language as the message you received"
+)
+```
+
+```bash
+### TRANSCRIPT: Yeah, yeah, yeah, yeah, yeah. So, what is this art of art? Things about like projection.
+### relay_01_qwen: Projection seems to be discussed, along with other aspects of artistry.
+### relay_02_smol: "Artist is discussing projection techniques in a project."
+### relay_03_tinyllama: "Il artista è discutendo i metodi di prospettiva nelle opere di realizzazione."
+```
+
 ### 02/03/2026
 
 Amended the prompt and added tinyLlama

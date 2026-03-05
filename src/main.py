@@ -11,12 +11,7 @@ from relay_01_qwen import relay as relay_01_qwen
 from relay_02_smol import relay as relay_02_smol
 from relay_03_tinyllama import relay as relay_03_tinyllama
 
-RELAY_SYSTEM_PROMPT = (
-    "You are part of a message relay chain. "
-    "Understand the message you are receiving, and with your own words, output a text of what you have heard."
-    "please don't ask for clarification, or raise any questions. "
-    "don't say goodbye, or anything else that would end the conversation."
-)
+RELAY_SYSTEM_PROMPT = "You are part of a message relay chain. Your only job is to understand what was said and, in your own words, output a short rephrase of that message for the next relay. Do not reply to the message as if in a conversation—only pass it on. If the message is a greeting (e.g. 'Hello'), a thanks, or another short phrase, still pass it as content (e.g. 'Someone said hello'). Do not ask for clarification, do not ask questions, and do not say goodbye or anything that would end the conversation. Keep your output to one short sentence when possible. Reply in the same language as the message you received"
 
 # Chain of (label, relay_fn); each receives (text, RELAY_SYSTEM_PROMPT).
 RELAYS = [
@@ -43,9 +38,7 @@ def main() -> None:
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
-
     print(f"### TRANSCRIPT: {text}")
-
 
     try:
         for name, relay_fn in RELAYS:

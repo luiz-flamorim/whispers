@@ -72,7 +72,11 @@ python whisper_chain/main.py
 
 # Journal
 
-### 05/03/2026
+Click to expand and see details.
+
+<details>
+
+<summary>05/03/2026: Greeting-handling in prompt; TinyLlama limited to 30 tokens; language drift noted.</summary>
 I have noticed that when the LLM is greeted with "Hello" or something else, it tends to responde to the greeting rather than understand and pass the message. I am adding details to the prompt to prevent it. I am also limiting the number of tokens from Tiny Llama to 30. I have notice a language switch when reducing the tokens from Llama, which needs to be fixed.
 
 ```bash
@@ -87,8 +91,10 @@ RELAY_SYSTEM_PROMPT = (
 ### relay_02_smol: "Artist is discussing projection techniques in a project."
 ### relay_03_tinyllama: "Il artista è discutendo i metodi di prospettiva nelle opere di realizzazione."
 ```
+</details>
 
-### 02/03/2026
+<details>
+<summary>02/03/2026: Prompt amended; TinyLlama added as third relay.</summary>
 
 Amended the prompt and added tinyLlama
 ```bash
@@ -106,12 +112,15 @@ I would like to know more about Maths
 ### relay_02_smol: Sure, I also like mathematics. Would you like to know if they have a specific topic in mind to explore or if they want a general introduction to mathematics?
 ### relay_03_tinyllama: I don't have access to the specific topic or intent of the person you're asking about. However, in general, if they have a specific topic in mind, you can ask them about it and provide a brief explanation or example. If they're interested in a general introduction to mathematics, you could start by asking them if they have any specific questions or areas they're interested in learning more about. Then, you can provide a brief overview of what mathematics is and how it's used in everyday life.
 ```
+</details>
 
-### 26/02/2026
+<details>
+<summary>26/02/2026: First run Qwen-SmolLM; prompt updated so relays interpret rather than just pass.</summary>
 
 First impression in running Qwen2.5-3b to SmolLM2-1.7B-Instruct
 they are just passing the message from one to another, I need to add something they interpret first.
-```
+
+```bash
 RELAY_SYSTEM_PROMPT = (
     "You are part of a message relay chain. "
     "Understand the message you are receiving, and with your own words, "
@@ -122,3 +131,4 @@ RELAY_SYSTEM_PROMPT = (
 )
 ```
 ---
+</details>

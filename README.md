@@ -5,31 +5,32 @@ An experimentation in the whispering game: you speak into the microphone; the ap
 
 ## Voice capture (speech-to-text)
 
-### Configuration
+Microphone input is recorded and transcribed locally — no LLM, no cloud. The transcript is then passed to the first relay.
 
-- **STT (recording & Whisper):** edit `src/stt.py` — `RECORD_SECONDS`, `SAMPLE_RATE`, `INPUT_DEVICE`, `WHISPER_MODEL_SIZE`, `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE`.
-- **Relays:** edit the relay modules in `src/` — `MODEL_NAME`, `MAX_NEW_TOKENS`, `TEMPERATURE`.
-- **Chain order and shared prompt:** edit `src/main.py` — `RELAY_SYSTEM_PROMPT` and the `RELAYS` list.
+<details>
+<summary>How it works & configuration</summary>
 
-### Voice capture
+- **Recording** — `sounddevice` reads from the microphone and writes a short WAV file.
+- **Transcription** — `faster-whisper` runs OpenAI's Whisper model locally via CTranslate2 (audio → text).
 
-Voice is captured and turned into text **without using an LLM**:
-
-1. **Recording** — I use the **sounddevice** library to read from the default microphone and write a short WAV file. It’s a thin wrapper around PortAudio (cross-platform). No AI here; it’s just audio I/O.
-2. **Transcription** — I use **faster-whisper** to turn that WAV into text. faster-whisper is a Python library that runs OpenAI’s Whisper model locally via CTranslate2. Whisper is a **speech-recognition model** (audio → text), not a chat/LLM. Everything runs on your machine; no cloud API is called.
-3. **sounddevice** = capture from mic; **faster-whisper** = offline speech-to-text. The resulting text is then passed to the first relay in the chain.
+Configure in `src/stt.py`: `RECORD_SECONDS`, `SAMPLE_RATE`, `INPUT_DEVICE`, `WHISPER_MODEL_SIZE`, `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE`.
 
 - sounddevice: https://python-sounddevice.readthedocs.io/
 - faster-whisper: https://github.com/SYSTRAN/faster-whisper
 - Whisper (OpenAI): https://github.com/openai/whisper
 
+</details>
+
 
 ## Relays (LLMs)
 
-Relays are **instruction-tuned language models** run locally with **Hugging Face Transformers**. Each relay gets the previous step’s text and a shared system prompt, and returns one reply. Order: transcript → relay 1 → relay 2 → …
+Relays are **instruction-tuned language models** run locally with **Hugging Face Transformers**. Each relay gets the previous step's text and a shared system prompt, and returns one reply. Order: transcript → relay 1 → relay 2 → …
+
+Configure chain order and shared prompt in `src/main.py` — `RELAY_SYSTEM_PROMPT` and the `RELAYS` list.
 
 <details>
 <summary>relay_01_qwen</summary>
+
 - **Model:** Qwen2.5-3B-Instruct (Alibaba).
 - **Hugging Face:** https://huggingface.co/Qwen/Qwen2.5-3B-Instruct  
 - **Qwen:** https://github.com/QwenLM/Qwen2  
@@ -38,6 +39,7 @@ Relays are **instruction-tuned language models** run locally with **Hugging Face
 
 <details>
 <summary>relay_02_smol</summary>
+
 - **Model:** SmolLM2-1.7B-Instruct (Hugging Face).
 - **Hugging Face:** https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct  
 - **Transformers:** https://huggingface.co/docs/transformers  
@@ -46,7 +48,6 @@ Ungated: no login required to download.
 </details>
 
 <details>
-
 <summary>relay_03_tinyllama</summary>
 
 - **Model:** TinyLlama-1.1B-Chat-v1.0 (TinyLlama).
@@ -55,6 +56,7 @@ Ungated: no login required to download.
 
 Ungated (Apache 2.0); no login required. ~1.1B parameters, good as a third hop to keep the chain light.
 </details>
+
 
 ## Setup
 

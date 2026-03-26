@@ -17,8 +17,7 @@ Voice is captured and turned into text **without using an LLM**:
 
 1. **Recording** — I use the **sounddevice** library to read from the default microphone and write a short WAV file. It’s a thin wrapper around PortAudio (cross-platform). No AI here; it’s just audio I/O.
 2. **Transcription** — I use **faster-whisper** to turn that WAV into text. faster-whisper is a Python library that runs OpenAI’s Whisper model locally via CTranslate2. Whisper is a **speech-recognition model** (audio → text), not a chat/LLM. Everything runs on your machine; no cloud API is called.
-
-**sounddevice** = capture from mic; **faster-whisper** = offline speech-to-text. The resulting text is then passed to the first relay in the chain.
+3. **sounddevice** = capture from mic; **faster-whisper** = offline speech-to-text. The resulting text is then passed to the first relay in the chain.
 
 - sounddevice: https://python-sounddevice.readthedocs.io/
 - faster-whisper: https://github.com/SYSTRAN/faster-whisper
@@ -29,29 +28,33 @@ Voice is captured and turned into text **without using an LLM**:
 
 Relays are **instruction-tuned language models** run locally with **Hugging Face Transformers**. Each relay gets the previous step’s text and a shared system prompt, and returns one reply. Order: transcript → relay 1 → relay 2 → …
 
-### relay_01_qwen
-
+<details>
+<summary>relay_01_qwen</summary>
 - **Model:** Qwen2.5-3B-Instruct (Alibaba).
 - **Hugging Face:** https://huggingface.co/Qwen/Qwen2.5-3B-Instruct  
 - **Qwen:** https://github.com/QwenLM/Qwen2  
 - **Transformers:** https://huggingface.co/docs/transformers
+</details>
 
-### relay_02_smol
-
+<details>
+<summary>relay_02_smol</summary>
 - **Model:** SmolLM2-1.7B-Instruct (Hugging Face).
 - **Hugging Face:** https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct  
 - **Transformers:** https://huggingface.co/docs/transformers  
 
 Ungated: no login required to download.
+</details>
 
-### relay_03_tinyllama
+<details>
+
+<summary>relay_03_tinyllama</summary>
 
 - **Model:** TinyLlama-1.1B-Chat-v1.0 (TinyLlama).
 - **Hugging Face:** https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0  
 - **Transformers:** https://huggingface.co/docs/transformers  
 
 Ungated (Apache 2.0); no login required. ~1.1B parameters, good as a third hop to keep the chain light.
-
+</details>
 
 ## Setup
 
@@ -72,11 +75,11 @@ python src/main.py
 
 # Rebuilding the Environment
 Unfortunately often Python and Windows don't get along, this means that sometimes the app decides to throw errors beyond my knowledge. The best option I hjave found to sort it is to delete the environment and recreate it fresh installing the dependencies. Here is my method:
-- Delete .venv fully (Explorer manual delete is fine).
-- Close IDE + terminals.
-- Reboot (to clear file locks).
-- Reopen terminal in repo root.
-- Recreate the environment with 3.11, upgrade pip and reinstall dependencies
+1. Delete .venv fully (Explorer manual delete is fine).
+2. Close IDE + terminals.
+3. Reboot (to clear file locks).
+4. Reopen terminal in repo root.
+5. Recreate the environment with 3.11, upgrade pip and reinstall dependencies
 
 ```bash
 py -3.11 -m venv .venv
@@ -93,7 +96,7 @@ Click to expand and see details.
 
 <summary>26/03/2026: Visual layer refactored; startup sequence optimised; architecture modularised.</summary>
 
-Replaced `py5` with `py5canvas` for the visual interface. Redesigned the visual layer into three separate modules with clear responsibilities: `visual_state.py` (thread-safe shared state), `visuals.py` (pure renderer), and the existing `main.py` (orchestrator). This eliminates the previous single-context issue where `py5canvas.run()` would reload the module and lose all state updates, causing columns to never appear.
+Redesigned the visual layer into three separate modules with clear responsibilities: `visual_state.py` (thread-safe shared state), `visuals.py` (pure renderer), and the existing `main.py` (orchestrator). This eliminates the previous single-context issue where `py5canvas.run()` would reload the module and lose all state updates, causing columns to never appear.
 
 Moved all heavy imports (`stt`, relay modules) to lazy load inside `main()` after the visual window is already open. This means the window is visible and responsive while models load in the background. Startup sequence is now: open window → load relays → load STT → speak.
 

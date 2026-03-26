@@ -1,105 +1,93 @@
-from datetime import datetime
-from queue import Empty, Queue
 from threading import Thread
 
 from py5canvas import *
+import visual_state
 
-_commands = Queue()
 _is_running = False
-_state = {
-    "relay_name": "-",
-    "start": "-",
-    "received": "-",
-    "emitted": "-",
-    "emitted_to": "-",
-    "stop": "-",
-}
+_should_close = False
+_visual_thread = None
 
-
-def _now_str() -> str:
-    return datetime.now().strftime("%H:%M:%S")
-
-
-def _fit_text(text: str, limit: int = 110) -> str:
-    if not text:
-        return "-"
-    clean = " ".join(str(text).split())
-    if len(clean) <= limit:
-        return clean
-    return clean[: limit - 3] + "..."
-
-
-def _queue_update(payload: dict) -> None:
-    _commands.put(("state_update", payload))
-
-
-def relay_start(relay_name: str, received: str) -> None:
-    _queue_update(
-        {
-            "relay_name": relay_name,
-            "start": _now_str(),
-            "received": _fit_text(received),
-            "emitted": "-",
-            "emitted_to": "-",
-            "stop": "-",
-        }
-    )
-
-
-def relay_stop(relay_name: str, emitted: str, emitted_to: str) -> None:
-    _queue_update(
-        {
-            "relay_name": relay_name,
-            "emitted": _fit_text(emitted),
-            "emitted_to": emitted_to,
-            "stop": _now_str(),
-        }
-    )
-
-
-def _apply_commands() -> None:
-    while True:
-        try:
-            cmd, value = _commands.get_nowait()
-        except Empty:
-            break
-        if cmd == "state_update":
-            _state.update(value)
 
 
 def setup() -> None:
-    size(1100, 360)
-    text_size(24)
-    text_font(create_font("Consolas", 22))
+    size(1440, 480)
+    text_size(16)
+    text_font(create_font("Consolas", 16))
+
+
+def _draw_relay_column(relay_name: str, relay_data: dict, x: float, y: float, col_width: float) -> None:
+    fill(255)
+    text(relay_name, [x, y])
+    y += 32
+
+    for key in ("status", "start", "received", "emitted", "emitted_to", "stop"):
+        text(f"{key}: {relay_data[key]}", [x, y])
+        y += 30
+
+    stroke(70)
+    line(x + col_width, 24, x + col_width, 456)
+    no_stroke()
 
 
 def draw() -> None:
-    _apply_commands()
-    background(20, 24, 28)
-    fill(230)
-    y = 50
-    for label in ("relay_name", "start", "received", "emitted", "emitted_to", "stop"):
-        text(f"{label}: {_state[label]}", [30, y])
-        y += 50
+    global _is_running
+    relay_order, relay_state = visual_state.snapshot()
+    if _should_close:
+        _is_running = False
+        cleanup()
+        return
+
+    background(0)
+
+    if not relay_order:
+        fill(180)
+        text("Waiting for relay configuration...", [32, 60])
+        return
+
+    margin_left = 24
+    usable_width = 1392
+    col_width = usable_width / len(relay_order)
+
+    for idx, relay_name in enumerate(relay_order):
+        x = margin_left + idx * col_width
+        relay_data = relay_state.get(
+            relay_name,
+            {
+                "status": "waiting",
+                "start": "-",
+                "received": "-",
+                "emitted": "-",
+                "emitted_to": "-",
+                "stop": "-",
+            },
+        )
+        _draw_relay_column(relay_name, relay_data, x, 56, col_width)
 
 
 def start_visuals() -> None:
-    global _is_running
+    global _is_running, _should_close, _visual_thread
     if _is_running:
         return
+    _should_close = False
     _is_running = True
-    try:
-        Thread(target=run, daemon=True).start()
-    except Exception:
-        _is_running = False
+    _visual_thread = Thread(target=_run_sketch, daemon=False)
+    _visual_thread.start()
 
 
 def stop_visuals() -> None:
+    # Keep the visual window open after relay completion.
+    return
+
+
+def _run_sketch() -> None:
     global _is_running
-    if not _is_running:
-        return
-    _is_running = False
     try:
-        no_loop()
-    except Exception:
-        pass
+        run()
+    finally:
+        _is_running = False
+
+
+def key_pressed() -> None:
+    global _should_close
+    if key in ("q", "Q", "\x1b"):
+        _should_close = True

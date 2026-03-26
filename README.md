@@ -55,24 +55,53 @@ Ungated (Apache 2.0); no login required. ~1.1B parameters, good as a third hop t
 
 ## Setup
 
-From the project root (e.g. `Wishpers`):
+From the project root (e.g. `whisper_chain`):
 
 ```bash
- # Windows PowerShell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1  
 # or: source .venv/bin/activate  # macOS/Linux
 
-pip install -r whisper_chain/requirements.txt
-python whisper_chain/scripts/download_model.py   # pre-download relay models (optional but recommended)
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python scripts/download_model.py   # pre-download relay models (optional but recommended)
 
 # run
-python whisper_chain/main.py
+python src/main.py
+```
+
+# Rebuilding the Environment
+Unfortunately often Python and Windows don't get along, this means that sometimes the app decides to throw errors beyond my knowledge. The best option I hjave found to sort it is to delete the environment and recreate it fresh installing the dependencies. Here is my method:
+- Delete .venv fully (Explorer manual delete is fine).
+- Close IDE + terminals.
+- Reboot (to clear file locks).
+- Reopen terminal in repo root.
+- Recreate the environment with 3.11, upgrade pip and reinstall dependencies
+
+```bash
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
 ```
 
 # Journal
 
 Click to expand and see details.
+
+<details>
+
+<summary>26/03/2026: Visual layer refactored; startup sequence optimised; architecture modularised.</summary>
+
+Replaced `py5` with `py5canvas` for the visual interface. Redesigned the visual layer into three separate modules with clear responsibilities: `visual_state.py` (thread-safe shared state), `visuals.py` (pure renderer), and the existing `main.py` (orchestrator). This eliminates the previous single-context issue where `py5canvas.run()` would reload the module and lose all state updates, causing columns to never appear.
+
+Moved all heavy imports (`stt`, relay modules) to lazy load inside `main()` after the visual window is already open. This means the window is visible and responsive while models load in the background. Startup sequence is now: open window → load relays → load STT → speak.
+
+The relay chain in `RELAYS` is now defined as module names (strings) rather than imported functions, making per-machine configuration cleaner — each node only imports the relay module it needs.
+
+Added clean shutdown: pressing `q` or `Esc` in the visual window closes it and exits Python. Window stays open after relay completion so results can be reviewed.
+
+</details>
 
 <details>
 

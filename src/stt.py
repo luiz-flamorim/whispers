@@ -8,7 +8,7 @@ import tempfile
 import wave
 from pathlib import Path
 
-RECORD_SECONDS = 8
+RECORD_SECONDS = 3
 SAMPLE_RATE = 16000
 INPUT_DEVICE = None  # None = default input device
 

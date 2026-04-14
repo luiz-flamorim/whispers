@@ -128,13 +128,43 @@ Click to expand and see details.
 
 <details>
 
-<summary>26/03/2026: Two new relays added; configurable chain length; visual polish.</summary>
+<summary>14/04/2026: OPT relay findings — completion model limitations identified.</summary>
 
-Added `relay_04_phi` (Microsoft Phi-3-mini-4k-instruct, ~3.8B) and `relay_05_opt` (Meta OPT-1.3B) to the relay pool. OPT has no chat-template support, so its module uses a plain prompt string — this also makes it the most architecturally distinct relay in the chain, useful for maximising drift.
+Ran a full chain and analysed the CSV output. `relay_05_opt` (Meta OPT-1.3B) produced incoherent, multi-turn hallucinations instead of a single rephrased sentence. Root cause: OPT is a raw **completion model**, not instruction-following. It treats the system prompt as text to continue rather than instructions to obey, so it generates fake `Message:`/`Relay:` exchange loops imitating the prompt format. At `TEMPERATURE = 0.9` the small model's lack of instruction-following is amplified further, and the system prompt text itself was seen leaking into the output. `relay_05_opt` will be replaced in a future session with a small instruction-tuned alternative (e.g. `Qwen2.5-0.5B-Instruct`) that handles chat templates correctly at a similar parameter count.
+
+```python
+# message received by the relay
+"I have a black t-shirt."
+
+# message sent
+"I will be out in less than 30 minutes. Message: I will not be able to accept your message. Relay: I am not sure you are a good person, and will not need to be out so soon. Message: I will be out in less than 30 minutes. Relay: I will be out in less than 30 minutes. You are part of a"
+```
+
+</details>
+
+<details>
+
+<summary>12/04/2026: Visual panel polish; RECORDING indicator; CSV chain log.</summary>
+
+Aligned the `HOPS` and `RECORDING` status fields so both start at the same right-column x position, regardless of label length. Added a live `RECORDING: [off/on]` indicator on step 2 of the info panel — it is toggled by `main.py` via `visual_state.set_recording()` immediately before and after `transcribe_once()`. The controls bar now draws each interactive token (`↑/↓`, `PgUp/Dn`, `Q/Esc`, `F`, `■/□`) in bright green with dimmer descriptive text rendered segment-by-segment using a monospace character-width estimate. Added one blank line between the numbered steps and the controls bar, and updated step 3 wording to "Speak your sentence when the recording is on."
+
+Added `src/chain_log.py`, a standalone CSV logging module. It accumulates per-hop rows in memory during the run (`add_hop(order, relay, received, sent)` captures the timestamp at call time) and writes a timestamped file to `logs/chain_YYYYMMDD_HHMMSS.csv` at the end of each session. `main.py` calls `add_hop()` inside the hop loop and `save_csv()` after the chain completes, logging the filename to the canvas panel.
+
+</details>
+
+<details>
+
+<summary>11/04/2026: Configurable chain length; visual polish.</summary>
 
 Introduced `CHAIN_LENGTH` in `main.py` (default 5, freely adjustable). A `_build_hop_sequence` function draws that many relays randomly from the pool with no immediate repeats, assigns each a `hop_id` (`hop_01`, `hop_02`, …), and feeds the sequence to `visual_state`. The chain is now independent of the number of relay files — you can run 12 hops with 5 models, or 3 hops with 2.
 
-Visual fixes: separator lines were overlapping text — increased clearance above and below each divider. Added `mouse_wheel` callback so the window scrolls with the mouse wheel; auto-scroll (following the active hop) resumes automatically ~3 seconds after the last manual scroll.
+</details>
+
+<details>
+
+<summary>10/04/2026: Two new relays added</summary>
+
+Added `relay_04_phi` (Microsoft Phi-3-mini-4k-instruct, ~3.8B) and `relay_05_opt` (Meta OPT-1.3B) to the relay pool. OPT has no chat-template support, so its module uses a plain prompt string — this also makes it the most architecturally distinct relay in the chain, useful for maximising drift.
 
 </details>
 

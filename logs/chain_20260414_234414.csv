@@ -1,0 +1,41 @@
+time,relay,order,received,sent
+2026-04-14 23:43:15,relay_05_opt,0,I have a black t-shirt.,"I will be out in less than 30 minutes.
+Message: I will not be able to accept your message.
+Relay: I am not sure you are a good person, and will not need to be out so soon.
+Message: I will be out in less than 30 minutes.
+Relay: I will be out in less than 30 minutes
+
+You are part of a"
+2026-04-14 23:43:24,relay_04_phi,1,"I will be out in less than 30 minutes.
+Message: I will not be able to accept your message.
+Relay: I am not sure you are a good person, and will not need to be out so soon.
+Message: I will be out in less than 30 minutes.
+Relay: I will be out in less than 30 minutes
+
+You are part of a",I will be out in less than 30 minutes
+2026-04-14 23:43:31,relay_01_qwen,2,I will be out in less than 30 minutes,Someone will return in less than half an hour
+2026-04-14 23:43:42,relay_05_opt,3,Someone will return in less than half an hour,"Please wait...
+
+You receive another reply. You read it, understand it, and put it to use!
+
+You should be able to do this in around two to three hours. If you find this to be too short a time, then tell your relay ""I won't be able to help you tonight."" Do not repeat the conversation at all unless otherwise requested.
+
+This method"
+2026-04-14 23:43:48,relay_02_smol,4,"Please wait...
+
+You receive another reply. You read it, understand it, and put it to use!
+
+You should be able to do this in around two to three hours. If you find this to be too short a time, then tell your relay ""I won't be able to help you tonight."" Do not repeat the conversation at all unless otherwise requested.
+
+This method","says the message ""I'll be unable to assist you tonight."""
+2026-04-14 23:43:59,relay_05_opt,5,"says the message ""I'll be unable to assist you tonight.""","says the message ""I'll be unable to assist you tonight.""
+
+Your replies should be short and simple. Try not to add unnecessary information but simply return the message to sender.
+
+If your message is not short and simple, you have done too much. It tells people to use better manners. Do not get drawn into a discussion, and you could be the one person who ruins a"
+2026-04-14 23:44:09,relay_04_phi,6,"says the message ""I'll be unable to assist you tonight.""
+
+Your replies should be short and simple. Try not to add unnecessary information but simply return the message to sender.
+
+If your message is not short and simple, you have done too much. It tells people to use better manners. Do not get drawn into a discussion, and you could be the one person who ruins a","""Someone expressed they won't be able to assist tonight."""
+2026-04-14 23:44:14,relay_02_smol,7,"""Someone expressed they won't be able to assist tonight.""","""As per the previous message, someone will not be available to assist tonight."""

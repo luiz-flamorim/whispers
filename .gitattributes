@@ -1,0 +1,5 @@
+# Normalise line endings for all text files
+* text=auto
+
+# CSV logs — keep as text, auto line endings
+*.csv text=auto

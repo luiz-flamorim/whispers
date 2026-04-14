@@ -3,16 +3,32 @@ import random
 from importlib import import_module
 from pathlib import Path
 
+import chain_log
+
 _here = Path(__file__).resolve().parent
 if str(_here) not in sys.path:
     sys.path.insert(0, str(_here))
 
 try:
-    from visual_state import configure_hops, hop_start, hop_stop
+    from visual_state import (configure_hops, hop_start, hop_stop, log as _vlog,
+                               set_chain_length, wait_for_start, get_chain_length,
+                               set_recording)
 except ImportError:
-    configure_hops = None
-    hop_start = None
-    hop_stop = None
+    configure_hops    = None
+    hop_start         = None
+    hop_stop          = None
+    _vlog             = None
+    set_chain_length  = None
+    wait_for_start    = None
+    get_chain_length  = None
+    set_recording     = None
+
+
+def _log(msg: str) -> None:
+    """Log to the canvas panel and to stdout."""
+    print(msg)
+    if _vlog is not None:
+        _vlog(msg)
 
 try:
     from visuals import start_visuals, stop_visuals
@@ -32,7 +48,6 @@ RELAYS = [
 ]
 
 # Total number of hops the message will make through the relay pool.
-# Can exceed len(RELAYS) — relays are reused randomly with no immediate repeats.
 CHAIN_LENGTH = 8
 
 
@@ -64,44 +79,64 @@ def _build_hop_sequence(relay_names: list, chain_length: int) -> list:
 
 
 def main() -> None:
-    hop_sequence = _build_hop_sequence([name for name, _ in RELAYS], CHAIN_LENGTH)
+    # Set the default hop count before the window opens so the UI shows it.
+    if set_chain_length is not None:
+        set_chain_length(CHAIN_LENGTH)
 
-    if configure_hops is not None:
-        configure_hops(hop_sequence)
     if start_visuals is not None:
         start_visuals()
 
+    # Wait for the user to press SPACE; they may adjust the hop count first.
+    chain_length = CHAIN_LENGTH
+    if wait_for_start is not None:
+        chain_length = wait_for_start()
+
+    hop_sequence = _build_hop_sequence([name for name, _ in RELAYS], chain_length)
+    if configure_hops is not None:
+        configure_hops(hop_sequence)
+
+    _log("Loading relays…")
     try:
         loaded_relays = _load_relays()
     except Exception as e:
-        print("Error: Failed to load relay modules.", file=sys.stderr)
+        _log(f"Error: Failed to load relay modules. {e}")
         print(str(e), file=sys.stderr)
         if stop_visuals is not None:
             stop_visuals()
         sys.exit(1)
+    _log(f"Relays loaded. Chain: {chain_length} hops across {len(RELAYS)} models.")
 
+    _log("Loading STT…")
     try:
         from stt import transcribe_once
     except ImportError as e:
-        print("Error: Failed to load STT module.", file=sys.stderr)
+        _log(f"Error: Failed to load STT module. {e}")
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
-    print("Ready. Speak now…")
+    _log("Ready. Speak now…")
+    if set_recording is not None:
+        set_recording(True)
     try:
         text = transcribe_once()
     except ImportError as e:
-        print("Error: Missing dependency.", file=sys.stderr)
+        _log(f"Error: Missing dependency. {e}")
         print(str(e), file=sys.stderr)
         sys.exit(1)
     except RuntimeError as e:
-        print("Error: Recording failed.", file=sys.stderr)
+        _log(f"Error: Recording failed. {e}")
         print(str(e), file=sys.stderr)
         sys.exit(1)
     except ValueError as e:
-        print("Error: Transcription failed.", file=sys.stderr)
+        _log(f"Error: Transcription failed. {e}")
         print(str(e), file=sys.stderr)
         sys.exit(1)
+    finally:
+        if set_recording is not None:
+            set_recording(False)
+
+    _log(f"Transcript: {text[:100]}")
+    _log(f"Starting chain ({chain_length} hops)…")
 
     try:
         for hop_idx, relay_name in enumerate(hop_sequence):
@@ -110,18 +145,24 @@ def main() -> None:
             relay_fn, extra_prompt = loaded_relays[relay_name]
             effective_prompt = RELAY_SYSTEM_PROMPT + (" " + extra_prompt if extra_prompt else "")
 
+            received_text = text
             if hop_start is not None:
                 hop_start(hop_id, relay_name, text)
             text = relay_fn(text, effective_prompt)
             if hop_stop is not None:
                 hop_stop(hop_id, relay_name, text, next_relay)
+            chain_log.add_hop(hop_idx, relay_name, received_text, text)
 
     except Exception as e:
-        print("Error: Relay LLM failed.", file=sys.stderr)
+        _log(f"Error: Relay LLM failed. {e}")
         print(str(e), file=sys.stderr)
         if stop_visuals is not None:
             stop_visuals()
         sys.exit(1)
+
+    _log("Chain complete.")
+    csv_path = chain_log.save_csv()
+    _log(f"Saved: {csv_path.name}")
 
     if stop_visuals is not None:
         stop_visuals()

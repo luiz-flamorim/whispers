@@ -28,33 +28,65 @@ Relays are **instruction-tuned language models** run locally with **Hugging Face
 
 Configure chain order and shared prompt in `src/main.py` — `RELAY_SYSTEM_PROMPT` and the `RELAYS` list.
 
+Each relay module declares its own configuration at the top of the file:
+
+```python
+MODEL_NAME         = ""   # Hugging Face model identifier (e.g. "Qwen/Qwen2.5-3B-Instruct")
+INPUT_TEXT         = ""   # Placeholder for standalone testing only — not used by the chain
+MAX_NEW_TOKENS     = 0    # Maximum number of tokens the model can generate per reply
+TEMPERATURE        = 0.0  # Sampling temperature: lower = more literal, higher = more creative
+RELAY_EXTRA_PROMPT = ""   # Optional extra instruction appended to the shared system prompt for this relay only. Leave empty to use the shared prompt unchanged.
+```
+
 <details>
 <summary>relay_01_qwen</summary>
 
-- **Model:** Qwen2.5-3B-Instruct (Alibaba).
+- **Model:** Qwen2.5-3B-Instruct (Alibaba). ~3B parameters.
 - **Hugging Face:** https://huggingface.co/Qwen/Qwen2.5-3B-Instruct  
 - **Qwen:** https://github.com/QwenLM/Qwen2  
-- **Transformers:** https://huggingface.co/docs/transformers
+- **Transformers:** https://huggingface.co/docs/transformers  
+
+Ungated; no login required. `MAX_NEW_TOKENS = 200`, `TEMPERATURE = 0.7`. `RELAY_EXTRA_PROMPT = ""` — uses the shared system prompt unchanged.
 </details>
 
 <details>
 <summary>relay_02_smol</summary>
 
-- **Model:** SmolLM2-1.7B-Instruct (Hugging Face).
+- **Model:** SmolLM2-1.7B-Instruct (Hugging Face). ~1.7B parameters.
 - **Hugging Face:** https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct  
 - **Transformers:** https://huggingface.co/docs/transformers  
 
-Ungated: no login required to download.
+Ungated; no login required. `MAX_NEW_TOKENS = 200`, `TEMPERATURE = 0.7`. `RELAY_EXTRA_PROMPT = ""` — uses the shared system prompt unchanged.
 </details>
 
 <details>
 <summary>relay_03_tinyllama</summary>
 
-- **Model:** TinyLlama-1.1B-Chat-v1.0 (TinyLlama).
+- **Model:** TinyLlama-1.1B-Chat-v1.0 (TinyLlama). ~1.1B parameters.
 - **Hugging Face:** https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0  
 - **Transformers:** https://huggingface.co/docs/transformers  
 
-Ungated (Apache 2.0); no login required. ~1.1B parameters, good as a third hop to keep the chain light.
+Ungated (Apache 2.0); no login required. `MAX_NEW_TOKENS = 60`, `TEMPERATURE = 0.4` — constrained to prevent the model from wandering off-topic. `RELAY_EXTRA_PROMPT` adds a stronger instruction: *"You are passing on a message, not answering it. Output only a single sentence that captures what was said."*
+</details>
+
+<details>
+<summary>relay_04_phi</summary>
+
+- **Model:** Phi-3-mini-4k-instruct (Microsoft). ~3.8B parameters.
+- **Hugging Face:** https://huggingface.co/microsoft/Phi-3-mini-4k-instruct  
+- **Transformers:** https://huggingface.co/docs/transformers  
+
+Ungated (MIT licence); no login required. `MAX_NEW_TOKENS = 200`, `TEMPERATURE = 0.7`. `RELAY_EXTRA_PROMPT = ""`. Strong instruction-following at small scale — keeps relay fidelity high while introducing a distinct linguistic style.
+</details>
+
+<details>
+<summary>relay_05_opt</summary>
+
+- **Model:** OPT-1.3B (Meta). ~1.3B parameters.
+- **Hugging Face:** https://huggingface.co/facebook/opt-1.3b  
+- **Transformers:** https://huggingface.co/docs/transformers  
+
+Ungated (OPT licence); no login required. `MAX_NEW_TOKENS = 80`, `TEMPERATURE = 0.9`. `RELAY_EXTRA_PROMPT = ""`. Older decoder-only architecture with no chat-template support — uses a plain prompt string rather than `apply_chat_template`. Higher temperature and shorter output window maximise linguistic drift, making it the most unpredictable relay in the pool.
 </details>
 
 
@@ -93,6 +125,18 @@ python -m pip install -r requirements.txt
 # Journal
 
 Click to expand and see details.
+
+<details>
+
+<summary>26/03/2026: Two new relays added; configurable chain length; visual polish.</summary>
+
+Added `relay_04_phi` (Microsoft Phi-3-mini-4k-instruct, ~3.8B) and `relay_05_opt` (Meta OPT-1.3B) to the relay pool. OPT has no chat-template support, so its module uses a plain prompt string — this also makes it the most architecturally distinct relay in the chain, useful for maximising drift.
+
+Introduced `CHAIN_LENGTH` in `main.py` (default 5, freely adjustable). A `_build_hop_sequence` function draws that many relays randomly from the pool with no immediate repeats, assigns each a `hop_id` (`hop_01`, `hop_02`, …), and feeds the sequence to `visual_state`. The chain is now independent of the number of relay files — you can run 12 hops with 5 models, or 3 hops with 2.
+
+Visual fixes: separator lines were overlapping text — increased clearance above and below each divider. Added `mouse_wheel` callback so the window scrolls with the mouse wheel; auto-scroll (following the active hop) resumes automatically ~3 seconds after the last manual scroll.
+
+</details>
 
 <details>
 

@@ -1,10 +1,10 @@
 # CONFIGURATION
 
-MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"  # Change this to swap models
-INPUT_TEXT = "Replace this with the transcript coming from your STT module."
-
-MAX_NEW_TOKENS = 200
-TEMPERATURE = 0.7
+MODEL_NAME        = "Qwen/Qwen2.5-3B-Instruct"  # Change this to swap models
+INPUT_TEXT        = "Replace this with the transcript coming from your STT module."
+MAX_NEW_TOKENS    = 200
+TEMPERATURE       = 0.7
+RELAY_EXTRA_PROMPT = ""  # Appended to the shared system prompt. Leave empty for default behaviour.
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer

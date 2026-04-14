@@ -1,6 +1,6 @@
-# CONFIGURATION
+# CONFIGURATION (EDIT HERE)
 
-MODEL_NAME         = "HuggingFaceTB/SmolLM2-1.7B-Instruct"  # Ungated; no HF login required
+MODEL_NAME         = "microsoft/Phi-3-mini-4k-instruct"  # Ungated; no HF login required
 INPUT_TEXT         = "Replace this with the transcript coming from your STT module."
 MAX_NEW_TOKENS     = 200
 TEMPERATURE        = 0.7

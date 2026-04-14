@@ -1,10 +1,10 @@
-# CONFIGURATION (EDIT HERE)
+# CONFIGURATION
 
-MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Ungated; no HF login required
-INPUT_TEXT = "Replace this with the transcript coming from your STT module."
-
-MAX_NEW_TOKENS = 30
-TEMPERATURE = 0.7
+MODEL_NAME         = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Ungated; no HF login required
+INPUT_TEXT         = "Replace this with the transcript coming from your STT module."
+MAX_NEW_TOKENS     = 60
+TEMPERATURE        = 0.4
+RELAY_EXTRA_PROMPT = "You are passing on a message, not answering it. Do not respond to the content. Output only a single sentence that captures what was said."
 
 
 import torch

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whisper Chain — Installation</title>
+  <style>
+    @font-face {
+      font-family: 'Cutive Mono';
+      src: url('fonts/CutiveMono-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: 'Cutive Mono', monospace;
+    }
+
+    canvas { display: block; }
+
+    /* ── Menu overlay ─────────────────────────────────────────── */
+
+    #wc-menu {
+      display: none;  /* shown/hidden by menu.js */
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.93);
+      z-index: 10;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .wc-inner {
+      max-width: 720px;
+      width: 90%;
+      padding: 60px 0;
+      color: #ccc;
+    }
+
+    .wc-title {
+      font-size: 13px;
+      letter-spacing: 0.25em;
+      color: #fff;
+      margin-bottom: 32px;
+    }
+
+    .wc-description p {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
+    .wc-description strong {
+      color: #bbb;
+      font-weight: normal;
+    }
+
+    .wc-description a {
+      color: #888;
+      text-decoration: underline;
+    }
+
+    .wc-description a:hover { color: #ccc; }
+
+    .wc-controls {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .wc-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: #555;
+    }
+
+    .wc-select {
+      background: #000;
+      border: 1px solid #333;
+      color: #ccc;
+      font-family: 'Cutive Mono', monospace;
+      font-size: 13px;
+      padding: 6px 10px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .wc-select:focus { outline: none; border-color: #666; }
+
+    .wc-hint {
+      margin-top: 32px;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: #444;
+    }
+
+    kbd {
+      border: 1px solid #444;
+      padding: 1px 5px;
+      font-family: 'Cutive Mono', monospace;
+      font-size: 11px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js"></script>
+  <script src="loader.js"></script>
+  <script src="sketch.js"></script>
+  <script src="menu.js"></script>
+</body>
+</html>

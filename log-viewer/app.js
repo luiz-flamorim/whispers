@@ -1,8 +1,5 @@
-// ── Configuration ─────────────────────────────────────────────────────────────
-// Path to the logs folder, relative to this file.
 const LOGS_PATH = '../logs/';
 
-// Add new log filenames here after each chain run.
 const LOG_FILES = [
     'chain_20260415_140450.csv',
     'chain_20260415_134320.csv',
@@ -10,18 +7,11 @@ const LOG_FILES = [
     'chain_20260415_132449.csv',
     'chain_20260414_234414.csv',
 ];
-// ──────────────────────────────────────────────────────────────────────────────
-
-
-// ── Entry point ───────────────────────────────────────────────────────────────
 
 function init() {
     populateDropdown();
     document.getElementById('log-select').addEventListener('change', onDropdownChange);
 }
-
-
-// ── Dropdown ──────────────────────────────────────────────────────────────────
 
 function populateDropdown() {
     const select = document.getElementById('log-select');
@@ -40,7 +30,6 @@ function populateDropdown() {
 }
 
 function formatLogName(filename) {
-    // Converts "chain_20260415_134320.csv" → "2026-04-15  ·  13:43:20"
     const match = filename.match(/chain_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})\.csv/);
     if (!match) return filename;
     return `${match[1]}-${match[2]}-${match[3]}  ·  ${match[4]}:${match[5]}:${match[6]}`;
@@ -51,9 +40,6 @@ function onDropdownChange(event) {
     if (!filename) return;
     loadLog(filename);
 }
-
-
-// ── Loading ───────────────────────────────────────────────────────────────────
 
 function loadLog(filename) {
     showStateMessage('Loading…');
@@ -72,15 +58,10 @@ function loadLog(filename) {
         });
 }
 
-
-// ── CSV parser ────────────────────────────────────────────────────────────────
-// Handles quoted fields that contain commas and newlines.
-
 function parseCSV(text) {
     const hops = [];
     let i = 0;
 
-    // skip the header row
     while (i < text.length && text[i] !== '\n') i++;
     i++;
 
@@ -98,7 +79,6 @@ function parseCSV(text) {
             });
         }
     }
-
     return hops;
 }
 
@@ -116,7 +96,6 @@ function parseRow(text, startIndex) {
             continue;
         }
 
-        // end of row — skip carriage return and/or newline
         if (i < text.length && text[i] === '\r') i++;
         if (i < text.length && text[i] === '\n') i++;
         break;
@@ -129,17 +108,15 @@ function parseField(text, startIndex) {
     let i = startIndex;
 
     if (text[i] === '"') {
-        // quoted field — may contain commas and embedded newlines
         let value = '';
-        i++; // skip the opening quote
+        i++;
 
         while (i < text.length) {
             if (text[i] === '"' && i + 1 < text.length && text[i + 1] === '"') {
-                // escaped quote ("") → literal "
                 value += '"';
                 i += 2;
             } else if (text[i] === '"') {
-                i++; // skip the closing quote
+                i++;
                 break;
             } else {
                 value += text[i];
@@ -150,7 +127,6 @@ function parseField(text, startIndex) {
         return { value: value, nextIndex: i };
     }
 
-    // unquoted field
     let value = '';
     while (i < text.length && text[i] !== ',' && text[i] !== '\n' && text[i] !== '\r') {
         value += text[i];
@@ -160,21 +136,38 @@ function parseField(text, startIndex) {
     return { value: value, nextIndex: i };
 }
 
-
-// ── Rendering ─────────────────────────────────────────────────────────────────
-
 function renderCards(hops) {
     const container = document.getElementById('cards-container');
     container.innerHTML = '';
 
     if (hops.length === 0) {
         showStateMessage('No hops found in this log.');
+        hideSummary();
         return;
     }
+
+    showSummary(hops);
 
     for (const hop of hops) {
         container.appendChild(createCard(hop));
     }
+}
+
+function showSummary(hops) {
+    const summary = document.getElementById('chain-summary');
+    const firstHop = hops.find(function (h) { return h.order === 0; });
+    const sentence = firstHop ? firstHop.received : '—';
+    const hopCount = hops.length;
+
+    summary.textContent =
+        'The initial sentence was "' + sentence + '", '
+        + 'and the chain ran for ' + hopCount + (hopCount === 1 ? ' hop.' : ' hops.');
+    summary.hidden = false;
+}
+
+function hideSummary() {
+    const summary = document.getElementById('chain-summary');
+    summary.hidden = true;
 }
 
 function createCard(hop) {
@@ -234,10 +227,8 @@ function createMessageBlock(label, text) {
     return block;
 }
 
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function showStateMessage(message) {
+    hideSummary();
     const container = document.getElementById('cards-container');
     container.innerHTML = '';
     const p = document.createElement('p');
@@ -255,6 +246,4 @@ function showErrorMessage(message) {
     container.appendChild(p);
 }
 
-
-// ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);

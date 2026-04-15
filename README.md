@@ -1,7 +1,14 @@
 # Whisper Chain — Whispering Game MVP
 
-An experimentation in the whispering game: you speak into the microphone; the app transcribes your speech and runs it through a chain of LLM relays. Each relay receives the previous output and responds in its own words. This is the MVP with one speech capture step and two relays.
+# Whisper Chain
 
+**Whisper Chain** is an inference experiment based on *Chinese Whispers* (also known as *Broken Telephone*). In the game, players line up, the first person whispers a phrase into the next player's ear, and the message travels down the chain until the last person reveals what they heard. The result is usually funny, as the message often ends up completely different from what started.
+
+This project does the same, but with LLMs instead of people. Each model receives the message and rephrases it in its own words before passing it on as a pure inference step. The user controls only a few parameters, but the number of hops has the biggest impact; fewer hops produce subtle changes, while more hops lead to increasingly odd results.
+
+The code is pure Python, designed to be modular so new relay models can be added easily. Running it produces structured logs of each inference step, which can be explored with the included browser-based log viewer. The repo also includes a development journal documenting the decisions behind the project.
+
+Feel free to fork it and build your own chain, following the requirements and instructions included.
 
 ## How to run it
 

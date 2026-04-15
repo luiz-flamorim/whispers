@@ -1,11 +1,9 @@
-/* ── Reset ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-/* ── Tokens ──────────────────────────────────────────────────────────────── */
 :root {
     --green-bright : #00ff41;
     --green-mid    : #00cc33;
@@ -16,7 +14,6 @@
     --bg-card-hover: #0e0e0e;
 }
 
-/* ── Base ────────────────────────────────────────────────────────────────── */
 html, body {
     background-color: var(--bg);
     color: var(--green-mid);
@@ -26,14 +23,12 @@ html, body {
     min-height: 100vh;
 }
 
-/* ── Layout ──────────────────────────────────────────────────────────────── */
 .container {
     max-width: 860px;
     margin: 0 auto;
     padding: 56px 24px 96px;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
 .site-header {
     border-bottom: 1px solid var(--green-faint);
     padding-bottom: 36px;
@@ -49,10 +44,28 @@ html, body {
 }
 
 .description {
-    max-width: 620px;
     color: var(--green-mid);
     opacity: 0.75;
     margin-bottom: 20px;
+}
+
+.description p + p {
+    margin-top: 12px;
+}
+
+.description a {
+    color: var(--green-bright);
+    text-decoration: none;
+    border-bottom: 1px solid var(--green-dim);
+    transition: border-color 0.15s;
+}
+
+.description a:hover {
+    border-bottom-color: var(--green-bright);
+}
+
+.hl {
+    color: var(--green-bright);
 }
 
 .github-link {
@@ -67,7 +80,6 @@ html, body {
     color: var(--green-bright);
 }
 
-/* ── Controls ────────────────────────────────────────────────────────────── */
 .controls {
     display: flex;
     align-items: center;
@@ -107,14 +119,23 @@ html, body {
     color: var(--green-mid);
 }
 
-/* ── Cards container ─────────────────────────────────────────────────────── */
+.chain-summary {
+    color: var(--green-dim);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+    border-left: 2px solid var(--green-faint);
+    padding-left: 12px;
+    margin-bottom: 32px;
+    opacity: 0.85;
+}
+
 .cards-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* ── Individual card ─────────────────────────────────────────────────────── */
 .card {
     border: 1px solid var(--green-faint);
     background-color: var(--bg-card);
@@ -183,7 +204,68 @@ html, body {
     user-select: none;
 }
 
-/* ── State messages ──────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+    .container {
+        padding: 40px 20px 72px;
+    }
+
+    .title {
+        font-size: 22px;
+        letter-spacing: 5px;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .log-select {
+        min-width: unset;
+        width: 100%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .container {
+        padding: 28px 16px 56px;
+    }
+
+    .title {
+        font-size: 18px;
+        letter-spacing: 3px;
+    }
+
+    .description {
+        font-size: 13px;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .relay-name {
+        flex: 1 1 100%;
+        order: 3;
+        opacity: 0.7;
+    }
+
+    .hop-number {
+        order: 1;
+    }
+
+    .hop-time {
+        order: 2;
+    }
+
+    .message-text {
+        font-size: 13px;
+    }
+}
+
 .state-message {
     color: var(--green-dim);
     font-size: 13px;

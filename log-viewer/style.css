@@ -1,0 +1,198 @@
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Tokens ──────────────────────────────────────────────────────────────── */
+:root {
+    --green-bright : #00ff41;
+    --green-mid    : #00cc33;
+    --green-dim    : #00802a;
+    --green-faint  : #003d10;
+    --bg           : #050505;
+    --bg-card      : #090909;
+    --bg-card-hover: #0e0e0e;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+html, body {
+    background-color: var(--bg);
+    color: var(--green-mid);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.site-header {
+    border-bottom: 1px solid var(--green-faint);
+    padding-bottom: 36px;
+    margin-bottom: 44px;
+}
+
+.title {
+    font-size: 26px;
+    font-weight: normal;
+    color: var(--green-bright);
+    letter-spacing: 8px;
+    margin-bottom: 20px;
+}
+
+.description {
+    max-width: 620px;
+    color: var(--green-mid);
+    opacity: 0.75;
+    margin-bottom: 20px;
+}
+
+.github-link {
+    color: var(--green-dim);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 1px;
+    transition: color 0.15s;
+}
+
+.github-link:hover {
+    color: var(--green-bright);
+}
+
+/* ── Controls ────────────────────────────────────────────────────────────── */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 44px;
+}
+
+.select-label {
+    color: var(--green-dim);
+    font-size: 11px;
+    letter-spacing: 3px;
+    white-space: nowrap;
+}
+
+.log-select {
+    background-color: var(--bg);
+    color: var(--green-bright);
+    border: 1px solid var(--green-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 280px;
+    transition: border-color 0.15s;
+}
+
+.log-select:hover,
+.log-select:focus {
+    border-color: var(--green-bright);
+}
+
+.log-select option {
+    background-color: #0a0a0a;
+    color: var(--green-mid);
+}
+
+/* ── Cards container ─────────────────────────────────────────────────────── */
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Individual card ─────────────────────────────────────────────────────── */
+.card {
+    border: 1px solid var(--green-faint);
+    background-color: var(--bg-card);
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.card:hover {
+    border-color: var(--green-dim);
+    background-color: var(--bg-card-hover);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--green-faint);
+}
+
+.hop-number {
+    color: var(--green-bright);
+    font-size: 11px;
+    letter-spacing: 3px;
+    white-space: nowrap;
+}
+
+.relay-name {
+    color: var(--green-mid);
+    font-size: 12px;
+    flex: 1;
+    opacity: 0.85;
+}
+
+.hop-time {
+    color: var(--green-dim);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.card-body {
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    margin-bottom: 6px;
+}
+
+.message-text {
+    color: var(--green-mid);
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.message-arrow {
+    color: var(--green-faint);
+    font-size: 16px;
+    padding: 2px 0;
+    user-select: none;
+}
+
+/* ── State messages ──────────────────────────────────────────────────────── */
+.state-message {
+    color: var(--green-dim);
+    font-size: 13px;
+    letter-spacing: 1px;
+    opacity: 0.6;
+}
+
+.error-message {
+    color: #ff4141;
+    font-size: 13px;
+    letter-spacing: 1px;
+}

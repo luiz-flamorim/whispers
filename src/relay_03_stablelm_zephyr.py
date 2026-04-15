@@ -1,10 +1,10 @@
-# CONFIGURATION
+# CONFIGURATION (EDIT HERE)
 
-MODEL_NAME         = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Ungated; no HF login required
+MODEL_NAME         = "stabilityai/stablelm-zephyr-3b"  # Ungated; no HF login required
 INPUT_TEXT         = "Replace this with the transcript coming from your STT module."
-MAX_NEW_TOKENS     = 60
-TEMPERATURE        = 0.4
-RELAY_EXTRA_PROMPT = "You are passing on a message, not answering it. Do not respond to the content. Output only a single sentence that captures what was said."
+MAX_NEW_TOKENS     = 80
+TEMPERATURE        = 0.7
+RELAY_EXTRA_PROMPT = ""  # Appended to the shared system prompt. Leave empty for default behaviour.
 
 
 import torch

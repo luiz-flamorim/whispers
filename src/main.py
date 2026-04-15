@@ -36,15 +36,15 @@ except ImportError:
     start_visuals = None
     stop_visuals = None
 
-RELAY_SYSTEM_PROMPT = "You are part of a message relay chain. Your only job is to understand what was said and, in your own words, output a short rephrase of that message for the next relay. Do not reply to the message as if in a conversation—only pass it on. If the message is a greeting (e.g. 'Hello'), a thanks, or another short phrase, still pass it as content (e.g. 'Someone said hello'). Do not ask for clarification, do not ask questions, and do not say goodbye or anything that would end the conversation. Keep your output to one short sentence when possible. Reply in the same language as the message you received"
+RELAY_SYSTEM_PROMPT = "You are part of a message relay chain. Your only job is to understand what was said and, in your own words, output a short rephrase of that message for the next relay. Do not reply to the message as if in a conversation—only pass it on. If the message is a greeting (e.g. 'Hello'), a thanks, or another short phrase, still pass it as content (e.g. 'Someone said hello'). Do not ask for clarification, do not ask questions, and do not say goodbye or anything that would end the conversation. Keep your output to one short sentence. Always reply in English, regardless of the language of the message you received."
 
 # Chain config. Each entry is (label, module_name). The module must expose `relay(text, system_prompt)`.
 RELAYS = [
     ("relay_01_qwen",      "relay_01_qwen"),
     ("relay_02_smol",      "relay_02_smol"),
-    ("relay_03_tinyllama", "relay_03_tinyllama"),
+    ("relay_03_stablelm_zephyr", "relay_03_stablelm_zephyr"),
     ("relay_04_phi",       "relay_04_phi"),
-    ("relay_05_opt",       "relay_05_opt"),
+    ("relay_05_stablelm",  "relay_05_stablelm"),
 ]
 
 # Total number of hops the message will make through the relay pool.
@@ -60,6 +60,28 @@ def _load_relays() -> dict:
         extra_prompt = getattr(module, "RELAY_EXTRA_PROMPT", "")
         loaded[name] = (relay_fn, extra_prompt)
     return loaded
+
+
+def _register_log_in_viewer(csv_filename: str) -> None:
+    """Prepend csv_filename to the LOG_FILES array in log-viewer/app.js.
+    Does nothing if the log-viewer folder does not exist."""
+    viewer_dir = _here.parent / "log-viewer"
+    app_js     = viewer_dir / "app.js"
+
+    if not viewer_dir.exists() or not app_js.exists():
+        return
+
+    content = app_js.read_text(encoding="utf-8")
+
+    marker = "const LOG_FILES = [\n"
+    if marker not in content:
+        _log("log-viewer/app.js found but LOG_FILES marker missing — skipping.")
+        return
+
+    new_entry = f"    '{csv_filename}',\n"
+    content = content.replace(marker, marker + new_entry, 1)
+    app_js.write_text(content, encoding="utf-8")
+    _log(f"log-viewer updated: {csv_filename} added to LOG_FILES.")
 
 
 def _build_hop_sequence(relay_names: list, chain_length: int) -> list:
@@ -163,6 +185,7 @@ def main() -> None:
     _log("Chain complete.")
     csv_path = chain_log.save_csv()
     _log(f"Saved: {csv_path.name}")
+    _register_log_in_viewer(csv_path.name)
 
     if stop_visuals is not None:
         stop_visuals()

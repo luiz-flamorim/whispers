@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper Chain — Log Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+
+        <header class="site-header">
+            <h1 class="title">WHISPER CHAIN</h1>
+            <p class="description">
+                A human whisper is transcribed and passed through a chain of language models,
+                each restating the message in its own words. With every relay, meaning shifts
+                through probabilistic interpretation rather than mishearing. The project explores
+                semantic drift and the instability of language when processed by machines.
+            </p>
+            <a class="github-link" href="https://github.com/luiz-flamorim/whispers" target="_blank" rel="noopener">
+                ↗ github.com/luiz-flamorim/whispers
+            </a>
+        </header>
+
+        <div class="controls">
+            <label for="log-select" class="select-label">CHAIN LOG</label>
+            <select id="log-select" class="log-select"></select>
+        </div>
+
+        <div id="cards-container" class="cards-container">
+            <p class="state-message">Select a log file above to begin.</p>
+        </div>
+
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

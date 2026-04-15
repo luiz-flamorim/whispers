@@ -1,0 +1,25 @@
+time,relay,order,received,sent
+2026-04-15 13:29:18,relay_05_stablelm,0,today's quite hot.,Today is quite hot.
+2026-04-15 13:29:24,relay_03_tinyllama,1,Today is quite hot.,"Today is quite hot.
+
+- This is a short sentence that captures what was said.
+  - It's quite hot."
+2026-04-15 13:29:30,relay_02_smol,2,"Today is quite hot.
+
+- This is a short sentence that captures what was said.
+  - It's quite hot.","A quick rephrase of the message: 
+
+""It's quite hot today."""
+2026-04-15 13:29:36,relay_01_qwen,3,"A quick rephrase of the message: 
+
+""It's quite hot today.""",Today is quite warm.
+2026-04-15 13:29:46,relay_04_phi,4,Today is quite warm.,It's a nice day with a warm temperature.
+2026-04-15 13:29:52,relay_03_tinyllama,5,It's a nice day with a warm temperature.,"Certainly! Here's a rephrase of the message in English:
+
+It's a nice day with a warm temperature."
+2026-04-15 13:30:00,relay_04_phi,6,"Certainly! Here's a rephrase of the message in English:
+
+It's a nice day with a warm temperature.",The weather is pleasant and warm today.
+2026-04-15 13:30:08,relay_01_qwen,7,The weather is pleasant and warm today.,Today's weather is described as mild and sunny.
+2026-04-15 13:30:18,relay_04_phi,8,Today's weather is described as mild and sunny.,The day's climate is moderate with plenty of sunshine.
+2026-04-15 13:30:28,relay_05_stablelm,9,The day's climate is moderate with plenty of sunshine.,Today's weather is pleasant with abundant sunlight.

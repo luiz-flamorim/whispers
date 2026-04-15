@@ -3,6 +3,21 @@
 An experimentation in the whispering game: you speak into the microphone; the app transcribes your speech and runs it through a chain of LLM relays. Each relay receives the previous output and responds in its own words. This is the MVP with one speech capture step and two relays.
 
 
+## How to run it
+
+```bash
+python src/main.py
+```
+
+1. The visual window opens while the models load in the background.
+2. Press **Space** to start (use **↑ / ↓** first if you want to adjust the number of hops).
+3. Speak your sentence into the microphone when the recording indicator turns on.
+4. The chain runs automatically — each relay rephrases what the previous one said.
+5. When the chain is complete, a CSV log is saved to `logs/` and the window stays open so you can read the output.
+
+**Viewing the logs.** Open `log-viewer/index.html` with a local server (e.g. the VS Code Live Server extension). Select any past run from the dropdown to see every hop laid out as a card — what each relay received, and what it passed on. Every time you run the chain, the new log is registered in the viewer automatically so it appears in the list straight away.
+
+
 ## Voice capture (speech-to-text)
 
 Microphone input is recorded and transcribed locally — no LLM, no cloud. The transcript is then passed to the first relay.
@@ -60,13 +75,13 @@ Ungated; no login required. `MAX_NEW_TOKENS = 200`, `TEMPERATURE = 0.7`. `RELAY_
 </details>
 
 <details>
-<summary>relay_03_tinyllama</summary>
+<summary>relay_03_stablelm_zephyr</summary>
 
-- **Model:** TinyLlama-1.1B-Chat-v1.0 (TinyLlama). ~1.1B parameters.
-- **Hugging Face:** https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0  
+- **Model:** StableLM-Zephyr-3B (Stability AI). ~3B parameters.
+- **Hugging Face:** https://huggingface.co/stabilityai/stablelm-zephyr-3b  
 - **Transformers:** https://huggingface.co/docs/transformers  
 
-Ungated (Apache 2.0); no login required. `MAX_NEW_TOKENS = 60`, `TEMPERATURE = 0.4` — constrained to prevent the model from wandering off-topic. `RELAY_EXTRA_PROMPT` adds a stronger instruction: *"You are passing on a message, not answering it. Output only a single sentence that captures what was said."*
+Ungated; no login required. `MAX_NEW_TOKENS = 80`, `TEMPERATURE = 0.7`. `RELAY_EXTRA_PROMPT = ""`. Zephyr-style RLHF fine-tune on top of StableLM-3B base — stronger instruction following than the smaller StableLM-2-1.6B in relay_05. Replaces `relay_03_tinyllama` (TinyLlama-1.1B-Chat-v1.0), which consistently leaked its own instruction text (bullet points, "Certainly! Here's a rephrase…" preambles) into the output despite two rounds of prompt engineering.
 </details>
 
 <details>
@@ -80,14 +95,21 @@ Ungated (MIT licence); no login required. `MAX_NEW_TOKENS = 200`, `TEMPERATURE =
 </details>
 
 <details>
-<summary>relay_05_opt</summary>
+<summary>relay_05_stablelm</summary>
 
-- **Model:** OPT-1.3B (Meta). ~1.3B parameters.
-- **Hugging Face:** https://huggingface.co/facebook/opt-1.3b  
+- **Model:** StableLM-2-1.6B-Chat (Stability AI). ~1.6B parameters.
+- **Hugging Face:** https://huggingface.co/stabilityai/stablelm-2-1_6b-chat  
 - **Transformers:** https://huggingface.co/docs/transformers  
 
-Ungated (OPT licence); no login required. `MAX_NEW_TOKENS = 80`, `TEMPERATURE = 0.9`. `RELAY_EXTRA_PROMPT = ""`. Older decoder-only architecture with no chat-template support — uses a plain prompt string rather than `apply_chat_template`. Higher temperature and shorter output window maximise linguistic drift, making it the most unpredictable relay in the pool.
+Ungated; no login required. `MAX_NEW_TOKENS = 80`, `TEMPERATURE = 0.7`. `RELAY_EXTRA_PROMPT` enforces English-only output, one sentence, no questions. Replaces `relay_05_opt` (Meta OPT-1.3B), which was a raw completion model incapable of instruction following and prone to language switching and prompt leakage.
 </details>
+
+
+## Log viewer
+
+A small browser-based tool (`log-viewer/`) for reading the chain logs. Select a run from the dropdown and each hop is displayed as a card showing what that relay received and what it sent on. Open it with any local server (e.g. the VS Code Live Server extension).
+
+After each run the log filename is automatically added to the viewer's file list, so it appears in the dropdown straight away.
 
 
 ## Setup
@@ -125,6 +147,29 @@ python -m pip install -r requirements.txt
 # Journal
 
 Click to expand and see details.
+
+<details>
+
+<summary>15/04/2026: Prompt engineering — language drift and relay behaviour analysis; log viewer added.</summary>
+
+Ran a 10-hop chain with the new relay pool (Qwen, SmolLM, TinyLlama, Phi, StableLM). Input: *"It's very hot today."* Two problems emerged from the CSV analysis:
+
+**Language drift cascade.** `relay_05_stablelm` switched the output to Chinese on hop 3 unprompted, then to Russian on hop 6, then to Portuguese on hop 8. Because the main system prompt instructed relays to "reply in the same language as the message you received", every subsequent relay faithfully followed the wrong language — Qwen stayed in Chinese, SmolLM produced a garbled translation of Russian. The fix is to anchor all relays to English in the main prompt regardless of incoming language.
+
+**TinyLlama adds questions.** Despite an existing `RELAY_EXTRA_PROMPT` telling it not to, TinyLlama appended "Can you please provide me with a brief summary of the text material?" on hop 0. This injected a question-answer dynamic that StableLM then continued for two more hops before SmolLM cleaned it up.
+
+**Actions taken:**
+- `RELAY_SYSTEM_PROMPT` updated: replaced "Reply in the same language as the message you received" with "Always reply in English, regardless of the language of the message you received."
+- `relay_05_stablelm` — added `RELAY_EXTRA_PROMPT`: explicit English-only, one sentence, no questions.
+- `relay_03_tinyllama` — strengthened `RELAY_EXTRA_PROMPT`: added explicit ban on questions and language switching.
+- `relay_01_qwen`, `relay_02_smol`, `relay_04_phi` — performing correctly, no changes.
+- `relay_05_opt` replaced by `relay_05_stablelm` (`stabilityai/stablelm-2-1_6b-chat`, ~1.6B, instruction-tuned with chat template support).
+
+A follow-up run confirmed StableLM is now well-behaved but TinyLlama continued leaking its instruction text into outputs (bullet-point lists, "Certainly! Here's a rephrase…" preambles) even after two rounds of `RELAY_EXTRA_PROMPT` strengthening — a model capability ceiling, not a prompt issue. `relay_03_tinyllama` replaced by `relay_03_stablelm_zephyr` (`stabilityai/stablelm-zephyr-3b`, ~3B, Zephyr-style RLHF fine-tune with full chat template support).
+
+Added `log-viewer/` — a browser interface (HTML/CSS/JS, no dependencies) for reading the chain CSVs. Each run is selectable from a dropdown; hops are rendered as cards showing the received and sent text side by side. `main.py` now automatically prepends each new log filename to the viewer's file list after saving.
+
+</details>
 
 <details>
 

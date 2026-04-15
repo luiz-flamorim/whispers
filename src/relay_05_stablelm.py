@@ -1,13 +1,11 @@
 # CONFIGURATION (EDIT HERE)
 
-MODEL_NAME         = "facebook/opt-1.3b"  # Ungated; no HF login required
+MODEL_NAME         = "stabilityai/stablelm-2-1_6b-chat"  # Ungated; no HF login required
 INPUT_TEXT         = "Replace this with the transcript coming from your STT module."
 MAX_NEW_TOKENS     = 80
-TEMPERATURE        = 0.9
-RELAY_EXTRA_PROMPT = ""  # Appended to the shared system prompt. Leave empty for default behaviour.
+TEMPERATURE        = 0.7
+RELAY_EXTRA_PROMPT = "Always write your reply in English. Output exactly one sentence. Do not ask questions. Do not switch to another language under any circumstances."
 
-# NOTE: OPT does not support chat templates. The relay() function uses a plain
-# prompt string instead of apply_chat_template.
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -26,8 +24,16 @@ def load_model(model_name: str):
 def relay(input_text: str, system_prompt: str) -> str:
     tokenizer, model = load_model(MODEL_NAME)
 
-    # OPT has no chat template — build a plain prompt string.
-    prompt = f"{system_prompt}\n\nMessage: {input_text}\nRelay:"
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": input_text}
+    ]
+
+    prompt = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
 
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
@@ -44,7 +50,6 @@ def relay(input_text: str, system_prompt: str) -> str:
             pad_token_id=pad_token_id,
         )
 
-    # Decode only the newly generated tokens, not the prompt.
     response = tokenizer.decode(
         outputs[0][inputs["input_ids"].shape[1]:],
         skip_special_tokens=True

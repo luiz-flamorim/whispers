@@ -1,0 +1,13 @@
+time,relay,order,received,sent
+2026-04-15 13:22:06,relay_03_tinyllama,0,It's very hot today.,It is indeed quite hot today. Can you please provide me with a brief summary of the text material?
+2026-04-15 13:23:18,relay_05_stablelm,1,It is indeed quite hot today. Can you please provide me with a brief summary of the text material?,"Yes, the text mentioned that it's very hot today. Can you use that information to summarize the material for me, please?"
+2026-04-15 13:23:26,relay_02_smol,2,"Yes, the text mentioned that it's very hot today. Can you use that information to summarize the material for me, please?",The text states that it is very hot today.
+2026-04-15 13:23:33,relay_05_stablelm,3,The text states that it is very hot today.,保測，今天非常炎热。
+2026-04-15 13:23:45,relay_01_qwen,4,保測，今天非常炎热。,有人提到今天非常炎热。
+2026-04-15 13:24:04,relay_04_phi,5,有人提到今天非常炎热。,Someone mentioned that today is very hot.
+2026-04-15 13:24:17,relay_05_stablelm,6,Someone mentioned that today is very hot.,"*говорил* человек *вызовутое имя* о том, что сегодня очень жарко."
+2026-04-15 13:24:26,relay_02_smol,7,"*говорил* человек *вызовутое имя* о том, что сегодня очень жарко.","The speaker said, ""He will call his name today very hot."""
+2026-04-15 13:24:38,relay_05_stablelm,8,"The speaker said, ""He will call his name today very hot.""",Líder (or similar term of address) mencionou (or translated to your language) que ele (or translated it) chamará seu nome amanhã quente.
+2026-04-15 13:24:49,relay_03_tinyllama,9,Líder (or similar term of address) mencionou (or translated to your language) que ele (or translated it) chamará seu nome amanhã quente.,"Líder (ou termo de direção) mencionou que ele (ou traduziu-lo) chamará seu nome amanhando quente.
+
+Translation: The leader will call your name warmly tomorrow."

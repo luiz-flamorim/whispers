@@ -1,0 +1,13 @@
+time,relay,order,received,sent
+2026-04-15 14:03:54,relay_02_smol,0,I am very hungry.,"The person said, ""I am very hungry."""
+2026-04-15 14:04:04,relay_03_stablelm_zephyr,1,"The person said, ""I am very hungry.""","Message received: ""I am very hungry."" 
+
+Rephrased and passed on: ""Someone is very hungry."""
+2026-04-15 14:04:16,relay_04_phi,2,"Message received: ""I am very hungry."" 
+
+Rephrased and passed on: ""Someone is very hungry.""","Rephrased and relayed message: ""A person expresses having a significant appetite."""
+2026-04-15 14:04:25,relay_01_qwen,3,"Rephrased and relayed message: ""A person expresses having a significant appetite.""",Someone indicates having a notable desire for food.
+2026-04-15 14:04:31,relay_02_smol,4,Someone indicates having a notable desire for food.,"""I heard that someone mentioned they have a strong desire for food."""
+2026-04-15 14:04:38,relay_03_stablelm_zephyr,5,"""I heard that someone mentioned they have a strong desire for food.""",Someone mentioned a strong desire for food.
+2026-04-15 14:04:43,relay_02_smol,6,Someone mentioned a strong desire for food.,"""That person is seeking a strong desire for food."""
+2026-04-15 14:04:50,relay_01_qwen,7,"""That person is seeking a strong desire for food.""",A person expresses an intense craving for food.

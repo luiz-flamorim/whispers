@@ -5,6 +5,9 @@ const PADDING_X         = 0.06;   // horizontal padding as fraction of canvas wi
 const PADDING_Y         = 0.05;   // vertical padding as fraction of canvas height
 const COLOR_REST        = 30;     // resting word brightness (0–255)
 const COLOR_LIT         = 255;    // highlighted word brightness
+const COLOR_SEP         = 80;     // arrow separator brightness (fixed, never highlighted)
+const SEPARATOR         = '→';
+const SEP_FONT          = 'Georgia'; // fallback font used only for the separator glyph
 const LERP_SPEED        = 0.10;   // hover fade speed
 const FADE_OUT_SPEED    = 0.07;   // transition fade-out speed
 
@@ -61,10 +64,12 @@ function draw() {
     let allDark = true;
     for (let i = 0; i < words.length; i++) {
       words[i].brightness = lerp(words[i].brightness, 0, FADE_OUT_SPEED);
-      if (words[i].brightness > 1) allDark = false;
+      if (words[i].blockIdx !== -1 && words[i].brightness > 1) allDark = false;
+      textFont(words[i].blockIdx === -1 ? SEP_FONT : font);
       fill(words[i].brightness);
       text(words[i].text, words[i].x, words[i].y);
     }
+    textFont(font);
     if (allDark) {
       hops            = pendingHops;
       pendingHops     = null;
@@ -84,11 +89,15 @@ function draw() {
   }
 
   for (let i = 0; i < words.length; i++) {
-    const target        = words[i].blockIdx === active ? COLOR_LIT : COLOR_REST;
-    words[i].brightness = lerp(words[i].brightness, target, LERP_SPEED);
+    const isSep = words[i].blockIdx === -1;
+    const target = isSep ? COLOR_SEP
+                 : words[i].blockIdx === active ? COLOR_LIT : COLOR_REST;
+    words[i].brightness = isSep ? COLOR_SEP : lerp(words[i].brightness, target, LERP_SPEED);
+    textFont(isSep ? SEP_FONT : font);
     fill(words[i].brightness);
     text(words[i].text, words[i].x, words[i].y);
   }
+  textFont(font);
 }
 
 function windowResized() {
@@ -126,19 +135,24 @@ function fitFontSize() {
 function countLines(maxW) {
   const tokens = [];
   for (let bi = 0; bi < hops.length; bi++) {
+    if (bi > 0) tokens.push(SEPARATOR);
     const parts = hops[bi].trim().split(/\s+/);
     for (let pi = 0; pi < parts.length; pi++) tokens.push(parts[pi]);
   }
 
   let numLines  = 1;
   let lineW     = 0;
+  textFont(font);
   const spaceW  = textWidth(' ');
 
   for (let ti = 0; ti < tokens.length; ti++) {
+    const isSep = tokens[ti] === SEPARATOR;
+    textFont(isSep ? SEP_FONT : font);
     const tw = textWidth(tokens[ti]);
     if (lineW + tw > maxW && lineW > 0) { numLines++; lineW = tw + spaceW; }
     else lineW += tw + spaceW;
   }
+  textFont(font);
 
   return numLines;
 }
@@ -149,6 +163,7 @@ function activeBlock() {
   let bestDist = Infinity;
 
   for (let i = 0; i < words.length; i++) {
+    if (words[i].blockIdx === -1) continue; // skip separators
     const d = dist(mouseX, mouseY, words[i].cx, words[i].y);
     if (d < bestDist) { bestDist = d; best = words[i].blockIdx; }
   }
@@ -168,9 +183,11 @@ function buildLayout() {
   const padY = height * PADDING_Y;
   const maxW = width  - padX * 2;
 
-  // Flatten all hops into one token list, each token tagged with its blockIdx
+  // Flatten all hops into one token list, each token tagged with its blockIdx.
+  // A separator arrow (blockIdx: -1) is inserted between hops.
   const tokens = [];
   for (let bi = 0; bi < hops.length; bi++) {
+    if (bi > 0) tokens.push({ text: SEPARATOR, blockIdx: -1 });
     const parts = hops[bi].trim().split(/\s+/);
     for (let pi = 0; pi < parts.length; pi++) {
       tokens.push({ text: parts[pi], blockIdx: bi });
@@ -182,8 +199,12 @@ function buildLayout() {
   let line    = [];
   for (let ti = 0; ti < tokens.length; ti++) {
     const token = tokens[ti];
-    const probe = line.reduce(function (s, w) { return s + textWidth(w.text + ' '); }, 0)
-                + textWidth(token.text + ' ');
+    const probe = line.reduce(function (s, w) {
+                    textFont(w.blockIdx === -1 ? SEP_FONT : font);
+                    return s + textWidth(w.text + ' ');
+                  }, 0)
+                + (textFont(token.blockIdx === -1 ? SEP_FONT : font), textWidth(token.text + ' '));
+    textFont(font);
     if (probe > maxW && line.length > 0) { lines.push(line); line = [token]; }
     else line.push(token);
   }
@@ -202,21 +223,29 @@ function buildLayout() {
     if (row.length === 1 || lastLine) {
       let x = padX;
       for (let ri = 0; ri < row.length; ri++) {
+        const isSep = row[ri].blockIdx === -1;
+        textFont(isSep ? SEP_FONT : font);
         const tw = textWidth(row[ri].text);
         words.push({ text: row[ri].text, x: x, y: y, cx: x + tw * 0.5,
-                     brightness: 0, blockIdx: row[ri].blockIdx });
-        trackBlock(blockYMap, row[ri].blockIdx, y);
+                     brightness: isSep ? COLOR_SEP : 0, blockIdx: row[ri].blockIdx });
+        if (!isSep) trackBlock(blockYMap, row[ri].blockIdx, y);
         x += tw + textWidth(' ');
       }
+      textFont(font);
     } else {
-      const widths  = row.map(function (w) { return textWidth(w.text); });
+      const widths  = row.map(function (w) {
+        textFont(w.blockIdx === -1 ? SEP_FONT : font);
+        return textWidth(w.text);
+      });
+      textFont(font);
       const totalWW = widths.reduce(function (a, b) { return a + b; }, 0);
       const gap     = (maxW - totalWW) / (row.length - 1);
       let x         = padX;
       for (let ri = 0; ri < row.length; ri++) {
+        const isSep = row[ri].blockIdx === -1;
         words.push({ text: row[ri].text, x: x, y: y, cx: x + widths[ri] * 0.5,
-                     brightness: 0, blockIdx: row[ri].blockIdx });
-        trackBlock(blockYMap, row[ri].blockIdx, y);
+                     brightness: isSep ? COLOR_SEP : 0, blockIdx: row[ri].blockIdx });
+        if (!isSep) trackBlock(blockYMap, row[ri].blockIdx, y);
         x += widths[ri] + gap;
       }
     }

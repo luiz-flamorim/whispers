@@ -151,6 +151,7 @@ Open `installation/index.html` with any local server, or visit the hosted versio
 From the project root (e.g. `whisper_chain`):
 
 ```bash
+# create and activate the environment, e.g.
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1  
 # or: source .venv/bin/activate  # macOS/Linux
@@ -184,7 +185,27 @@ Click to expand and see details.
 
 <details>
 
-<summary>15/04/2026: Prompt engineering — language drift and relay behaviour analysis; log viewer added.</summary>
+<summary>15/04/2026: Installation viewer built; 30-hop chain analysis — stabilisation and secondary drift.</summary>
+
+Built `installation/` — a browser-based interactive canvas using p5.js. All relay outputs from a chain log are rendered as one continuous justified paragraph. Moving the mouse highlights the nearest hop and speaks it aloud via the browser's Web Speech API. Font size is computed automatically to fill the screen without scrolling, making the viewer suitable for large displays and projected installations. A hidden menu (press **M**) lets the user select any log file from a dropdown; switching logs triggers a fade-out/fade-in transition. The auto-registration in `main.py` was extended to update `installation/loader.js` alongside `log-viewer/app.js` after each run.
+
+Ran a 30-hop chain with input: *"I love jazz in the evenings."* Several patterns emerged from the CSV analysis:
+
+**Immediate subject erasure.** The first-person voice disappeared on the very first hop — `relay_01_qwen` rephrased "I love jazz" as "Someone expresses loving jazz", removing the speaker entirely. It never returned.
+
+**Evening / night oscillation.** "Evenings" shifted to "night" by hop 1 and then oscillated between the two words across the full chain, with no relay ever settling definitively on one.
+
+**Capitalisation anomaly.** `relay_05_stablelm` on hop 4 output "NIGHTTIME jazz music was appreciated by the recipient" — all-caps on a single word, unprompted. The following relay normalised it without apparent difficulty.
+
+**Prompt leakage at hop 17.** `relay_03_stablelm_zephyr` leaked its own instruction framing into the output: *"A message was received about someone listening to jazz music in the evening. The next relay will receive a short rephrase of this message."* `relay_04_phi` on the next hop absorbed and cleaned it without propagating the leak further.
+
+**Mid-run stabilisation then secondary drift.** Between hops 10 and 16 the chain reached a near-equilibrium, cycling through minor rewordings of "jazz music was enjoyed in the evening." From hop 22 onward `relay_04_phi` introduced "jazz enthusiast" and "before bedtime", triggering a second wave of drift. By hop 29 the output had become: *"Late-night jazz music is commonly favored for its relaxing and soothing qualities"* — a general cultural statement about the genre, entirely detached from the original personal feeling.
+
+</details>
+
+<details>
+
+<summary>14/04/2026: Prompt engineering; language drift and relay behaviour analysis; log viewer added.</summary>
 
 Ran a 10-hop chain with the new relay pool (Qwen, SmolLM, TinyLlama, Phi, StableLM). Input: *"It's very hot today."* Two problems emerged from the CSV analysis:
 
@@ -207,7 +228,7 @@ Added `log-viewer/` — a browser interface (HTML/CSS/JS, no dependencies) for r
 
 <details>
 
-<summary>14/04/2026: OPT relay findings — completion model limitations identified.</summary>
+<summary>13/04/2026: OPT relay findings; completion model limitations identified.</summary>
 
 Ran a full chain and analysed the CSV output. `relay_05_opt` (Meta OPT-1.3B) produced incoherent, multi-turn hallucinations instead of a single rephrased sentence. Root cause: OPT is a raw **completion model**, not instruction-following. It treats the system prompt as text to continue rather than instructions to obey, so it generates fake `Message:`/`Relay:` exchange loops imitating the prompt format. At `TEMPERATURE = 0.9` the small model's lack of instruction-following is amplified further, and the system prompt text itself was seen leaking into the output. `relay_05_opt` will be replaced in a future session with a small instruction-tuned alternative (e.g. `Qwen2.5-0.5B-Instruct`) that handles chat templates correctly at a similar parameter count.
 

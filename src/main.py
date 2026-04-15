@@ -63,25 +63,25 @@ def _load_relays() -> dict:
 
 
 def _register_log_in_viewer(csv_filename: str) -> None:
-    """Prepend csv_filename to the LOG_FILES array in log-viewer/app.js.
-    Does nothing if the log-viewer folder does not exist."""
-    viewer_dir = _here.parent / "log-viewer"
-    app_js     = viewer_dir / "app.js"
+    """Prepend csv_filename to the LOG_FILES array in log-viewer/app.js
+    and installation/loader.js. Skips any file that does not exist."""
+    targets = [
+        _here.parent / "log-viewer"  / "app.js",
+        _here.parent / "installation" / "loader.js",
+    ]
+    marker    = "const LOG_FILES = [\n"
+    new_entry = f"  '{csv_filename}',\n"
 
-    if not viewer_dir.exists() or not app_js.exists():
-        return
-
-    content = app_js.read_text(encoding="utf-8")
-
-    marker = "const LOG_FILES = [\n"
-    if marker not in content:
-        _log("log-viewer/app.js found but LOG_FILES marker missing — skipping.")
-        return
-
-    new_entry = f"    '{csv_filename}',\n"
-    content = content.replace(marker, marker + new_entry, 1)
-    app_js.write_text(content, encoding="utf-8")
-    _log(f"log-viewer updated: {csv_filename} added to LOG_FILES.")
+    for path in targets:
+        if not path.exists():
+            continue
+        content = path.read_text(encoding="utf-8")
+        if marker not in content:
+            _log(f"{path.name}: LOG_FILES marker missing — skipping.")
+            continue
+        content = content.replace(marker, marker + new_entry, 1)
+        path.write_text(content, encoding="utf-8")
+        _log(f"{path.name} updated: {csv_filename} added to LOG_FILES.")
 
 
 def _build_hop_sequence(relay_names: list, chain_length: int) -> list:

@@ -1,0 +1,31 @@
+time,relay,order,received,sent
+2026-04-15 17:27:23,relay_01_qwen,0,I love jazz in the evenings.,Someone expresses loving jazz during the evening hours.
+2026-04-15 17:27:30,relay_02_smol,1,Someone expresses loving jazz during the evening hours.,"""Someone said they enjoyed jazz at night."""
+2026-04-15 17:27:38,relay_03_stablelm_zephyr,2,"""Someone said they enjoyed jazz at night.""","""Someone enjoyed jazz at night."""
+2026-04-15 17:27:51,relay_04_phi,3,"""Someone enjoyed jazz at night.""",Someone expressed their appreciation for nighttime jazz music.
+2026-04-15 17:28:01,relay_05_stablelm,4,Someone expressed their appreciation for nighttime jazz music.,NIGHTTIME jazz music was appreciated by the recipient.
+2026-04-15 17:28:10,relay_01_qwen,5,NIGHTTIME jazz music was appreciated by the recipient.,The recipient appreciated jazz music at nighttime.
+2026-04-15 17:28:15,relay_05_stablelm,6,The recipient appreciated jazz music at nighttime.,The recipient enjoyed jazz music in the evening.
+2026-04-15 17:28:22,relay_03_stablelm_zephyr,7,The recipient enjoyed jazz music in the evening.,Someone enjoyed jazz music in the evening.
+2026-04-15 17:28:29,relay_01_qwen,8,Someone enjoyed jazz music in the evening.,A person enjoyed jazz at night.
+2026-04-15 17:28:40,relay_04_phi,9,A person enjoyed jazz at night.,Someone appreciated listening to jazz music during the evening.
+2026-04-15 17:28:46,relay_02_smol,10,Someone appreciated listening to jazz music during the evening.,Jazz music was appreciated during the evening.
+2026-04-15 17:28:55,relay_01_qwen,11,Jazz music was appreciated during the evening.,"During the evening, jazz music was enjoyed."
+2026-04-15 17:29:06,relay_05_stablelm,12,"During the evening, jazz music was enjoyed.",Jazz music was enjoyed in the evening.
+2026-04-15 17:29:15,relay_01_qwen,13,Jazz music was enjoyed in the evening.,"In the evening, jazz music was appreciated."
+2026-04-15 17:29:24,relay_04_phi,14,"In the evening, jazz music was appreciated.",Someone enjoyed jazz music during the evening.
+2026-04-15 17:29:29,relay_05_stablelm,15,Someone enjoyed jazz music during the evening.,"During the evening, someone enjoyed jazz music."
+2026-04-15 17:29:38,relay_04_phi,16,"During the evening, someone enjoyed jazz music.",Someone listened to jazz music in the evening.
+2026-04-15 17:29:54,relay_03_stablelm_zephyr,17,Someone listened to jazz music in the evening.,A message was received about someone listening to jazz music in the evening. The next relay will receive a short rephrase of this message.
+2026-04-15 17:30:07,relay_04_phi,18,A message was received about someone listening to jazz music in the evening. The next relay will receive a short rephrase of this message.,Someone enjoys listening to jazz music during the evening hours.
+2026-04-15 17:30:14,relay_05_stablelm,19,Someone enjoys listening to jazz music during the evening hours.,"During evening hours, someone enjoys listening to jazz music."
+2026-04-15 17:30:21,relay_02_smol,20,"During evening hours, someone enjoys listening to jazz music.",Someone enjoys listening to jazz music during evening hours.
+2026-04-15 17:30:33,relay_01_qwen,21,Someone enjoys listening to jazz music during evening hours.,A person likes to listen to jazz at night.
+2026-04-15 17:30:51,relay_04_phi,22,A person likes to listen to jazz at night.,A jazz enthusiast prefers to enjoy jazz music before bedtime.
+2026-04-15 17:31:03,relay_01_qwen,23,A jazz enthusiast prefers to enjoy jazz music before bedtime.,A jazz lover enjoys listening to jazz before sleeping.
+2026-04-15 17:31:20,relay_04_phi,24,A jazz lover enjoys listening to jazz before sleeping.,A person who likes jazz often listens to it at bedtime.
+2026-04-15 17:31:36,relay_01_qwen,25,A person who likes jazz often listens to it at bedtime.,"Often, individuals who enjoy jazz music choose to listen to it before sleeping."
+2026-04-15 17:31:47,relay_02_smol,26,"Often, individuals who enjoy jazz music choose to listen to it before sleeping.","""Jazz music is often preferred for late-night listening due to its calming and soothing nature."""
+2026-04-15 17:32:02,relay_01_qwen,27,"""Jazz music is often preferred for late-night listening due to its calming and soothing nature.""",Late-night jazz is commonly favored for its relaxing and soothing qualities.
+2026-04-15 17:32:18,relay_03_stablelm_zephyr,28,Late-night jazz is commonly favored for its relaxing and soothing qualities.,Jazz music in the late-night hours is often preferred for its calming and soothing attributes.
+2026-04-15 17:32:27,relay_01_qwen,29,Jazz music in the late-night hours is often preferred for its calming and soothing attributes.,Late-night jazz music is commonly favored for its relaxing and soothing qualities.

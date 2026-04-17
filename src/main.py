@@ -111,7 +111,12 @@ def main() -> None:
     # Wait for the user to press SPACE; they may adjust the hop count first.
     chain_length = CHAIN_LENGTH
     if wait_for_start is not None:
-        chain_length = wait_for_start()
+        result = wait_for_start()
+        if result is None:
+            if stop_visuals is not None:
+                stop_visuals()
+            sys.exit(0)
+        chain_length = result
 
     hop_sequence = _build_hop_sequence([name for name, _ in RELAYS], chain_length)
     if configure_hops is not None:

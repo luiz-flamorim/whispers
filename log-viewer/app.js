@@ -1,6 +1,8 @@
 const LOGS_PATH = '../logs/';
 
 const LOG_FILES = [
+  'chain_20260416_161552.csv',
+  'chain_20260415_175209.csv',
     'chain_20260415_173227.csv',
     'chain_20260415_140450.csv',
     'chain_20260415_134320.csv',

@@ -8,6 +8,7 @@ _log_lines     = []    # timestamped log messages for the canvas
 _MAX_LOG       = 20    # oldest entries are dropped beyond this
 _chain_length  = 5     # hop count; set by main.py via set_chain_length()
 _start_event   = Event()  # set when user presses SPACE
+_quit_event    = Event()  # set when user presses Q/Esc before the chain starts
 _recording     = False  # True while transcribe_once() is active
 
 
@@ -108,9 +109,19 @@ def request_start(chain_length: int) -> None:
     _start_event.set()
 
 
-def wait_for_start() -> int:
-    """Block until user presses SPACE. Returns the configured chain length."""
+def request_quit() -> None:
+    """Signal that the user wants to quit without starting the chain."""
+    _quit_event.set()
+    # Also unblock wait_for_start() so the main thread can exit.
+    _start_event.set()
+
+
+def wait_for_start() -> int | None:
+    """Block until user presses SPACE or quits.
+    Returns the configured chain length, or None if the user quit."""
     _start_event.wait()
+    if _quit_event.is_set():
+        return None
     with _lock:
         return _chain_length
 

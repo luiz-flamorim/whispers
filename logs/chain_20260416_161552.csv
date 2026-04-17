@@ -1,0 +1,9 @@
+time,relay,order,received,sent
+2026-04-16 16:14:52,relay_01_qwen,0,Should this be worn?,Is this item supposed to be worn?
+2026-04-16 16:15:02,relay_04_phi,1,Is this item supposed to be worn?,The question is about the function or purpose of an item.
+2026-04-16 16:15:10,relay_03_stablelm_zephyr,2,The question is about the function or purpose of an item.,What is the function or purpose of this item?
+2026-04-16 16:15:18,relay_01_qwen,3,What is the function or purpose of this item?,The purpose of this item is requested or unknown without more context.
+2026-04-16 16:15:23,relay_02_smol,4,The purpose of this item is requested or unknown without more context.,The item's purpose remains unclear without additional context.
+2026-04-16 16:15:34,relay_05_stablelm,5,The item's purpose remains unclear without additional context.,"In order to clarify the item's purpose, more information is needed."
+2026-04-16 16:15:40,relay_03_stablelm_zephyr,6,"In order to clarify the item's purpose, more information is needed.",Additional context is required to determine the item's function.
+2026-04-16 16:15:52,relay_04_phi,7,Additional context is required to determine the item's function.,We need more information to understand what the item does.

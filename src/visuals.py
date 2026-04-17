@@ -1,5 +1,6 @@
 from threading import Thread
 
+import glfw
 from py5canvas import *
 import visual_state
 
@@ -297,7 +298,7 @@ def draw() -> None:
 
     if _should_close:
         _is_running = False
-        cleanup()
+        glfw.set_window_should_close(sketch.window, True)
         return
 
     background(0)
@@ -377,6 +378,8 @@ def key_pressed(k=None) -> None:
     k = k if k is not None else key
     if k in ("q", "Q", "\x1b"):
         _should_close = True
+        if not _chain_started:
+            visual_state.request_quit()
     elif k in ("f", "F"):
         _follow_mode = not _follow_mode
     elif k == " " and not _chain_started:

@@ -19,6 +19,12 @@ def add_hop(order: int, relay: str, received: str, sent: str) -> None:
     })
 
 
+def reset() -> None:
+    """Clear all accumulated rows so the next run starts fresh."""
+    global _rows
+    _rows = []
+
+
 def save_csv(output_dir: str | Path | None = None) -> Path:
     """Write all accumulated rows to a timestamped CSV and return its path.
 

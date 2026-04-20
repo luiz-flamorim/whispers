@@ -20,7 +20,7 @@ _GREEN_DIM     = (10, 55, 10)     # waiting hop
 _GREEN_LABEL   = (18, 110, 18)    # field labels
 _GREEN_DIVIDER = (12, 70, 12)     # row separator lines
 
-# Layout constants
+# Layout — window dimensions are set from the monitor in setup(); these are fallback defaults.
 _WIN_W    = 900
 _WIN_H    = 720
 _ROW_PAD  = 18     # left/right padding inside each row
@@ -28,7 +28,7 @@ _LINE_H   = 15     # px per text line
 _SCROLL_K = 0.12   # scroll easing factor (0–1, lower = smoother)
 
 # Fixed layout: header → info panel → log → scrollable cards
-_HEADER_H  = 56                       # title bar
+_HEADER_H  = 200                      # title bar
 _INFO_H    = 140                      # description + instructions + controls
 _LOG_LINES = 4                        # visible log lines
 _LOG_H     = _LOG_LINES * 18 + 20    # log panel height  (4×18 + 20 = 92)
@@ -61,8 +61,13 @@ def _text_colour(status: str, all_finished: bool) -> tuple:
 
 
 def setup() -> None:
-    global _hop_count_input
+    global _WIN_W, _WIN_H, _hop_count_input
+    monitor = glfw.get_primary_monitor()
+    vm      = glfw.get_video_mode(monitor)
+    _WIN_W  = vm.size.width
+    _WIN_H  = vm.size.height
     size(_WIN_W, _WIN_H)
+    glfw.set_window_attrib(sketch.window, glfw.RESIZABLE, glfw.TRUE)
     text_size(13)
     text_font(create_font("Consolas", 13))
     _hop_count_input = str(visual_state.get_chain_length())
@@ -75,7 +80,7 @@ def _draw_header(finished: bool, hop_count: int) -> None:
 
     fill(*_GREEN_BRIGHT)
     text_size(22)
-    text("WHISPER CHAIN", [_ROW_PAD, 40])
+    text("WHISPER CHAIN", [_ROW_PAD, 152])
 
     if hop_count > 0:
         status = "COMPLETE" if finished else "RUNNING…"
@@ -84,7 +89,7 @@ def _draw_header(finished: bool, hop_count: int) -> None:
         label = "STANDBY"
     fill(*(_GREEN_BRIGHT if finished else _GREEN_LABEL))
     text_size(11)
-    text(label, [_WIN_W - _ROW_PAD - 170, 40])
+    text(label, [_WIN_W - _ROW_PAD - 170, 152])
 
     stroke(*_GREEN_DIVIDER)
     stroke_weight(1)
@@ -143,7 +148,7 @@ def _draw_info(follow_mode: bool, hop_input: str, chain_started: bool) -> None:
         ("Controls  ",  False),
         ("\u2191/\u2193", True),  (": Scroll   ", False),
         ("PgUp/Dn",      True),  (": Jump   ",   False),
-        ("Q/Esc",        True),  (": Quit    ",  False),
+        ("Q/Esc",        True),  (": Quit   ",   False),
         ("F",            True),  (": Follow [",  False),
         (box,            True),  ("]",           False),
     ]
@@ -183,6 +188,32 @@ def _draw_log(log_lines: list) -> None:
     line(0, _LOG_START + _LOG_H - 1, _WIN_W, _LOG_START + _LOG_H - 1)
     no_stroke()
     text_size(13)
+
+
+def _draw_bottom_bar(message: str) -> None:
+    """Generic overlay bar at the bottom of the window."""
+    bar_h = 36
+    y     = _WIN_H - bar_h
+    fill(0)
+    no_stroke()
+    rect(0, y, _WIN_W, bar_h)
+    stroke(*_GREEN_DIVIDER)
+    stroke_weight(1)
+    line(0, y, _WIN_W, y)
+    no_stroke()
+    fill(*_GREEN_BRIGHT)
+    text_size(13)
+    text(message, [_ROW_PAD, y + 23])
+
+
+def _draw_print_prompt() -> None:
+    _draw_bottom_bar("Print receipt?   P = yes   N = no")
+
+
+def _draw_next_action_prompt() -> None:
+    _draw_bottom_bar("R = run again   Q = quit")
+
+
 
 
 def _draw_scrollbar(scroll_y: float, total_h: float) -> None:
@@ -329,6 +360,13 @@ def draw() -> None:
     _draw_log(log_lines)
     _draw_scrollbar(_scroll_y, total_content_h)
 
+    # Bottom prompts — mutually exclusive, shown after chain finishes
+    if finished and _chain_started:
+        if not visual_state.is_print_decided():
+            _draw_print_prompt()
+        elif not visual_state.is_next_action_decided():
+            _draw_next_action_prompt()
+
     # Scanline overlay for phosphor CRT feel
     stroke(0, 0, 0, 35)
     stroke_weight(1)
@@ -370,29 +408,61 @@ def _run_sketch() -> None:
 _SCROLL_STEP = 60  # pixels per keypress
 
 
+def _reset_visuals() -> None:
+    """Reset all local display state so the window is ready for a new chain."""
+    global _chain_started, _scroll_y, _target_scroll, _follow_mode, _hop_count_input
+    _chain_started   = False
+    _scroll_y        = 0.0
+    _target_scroll   = 0.0
+    _follow_mode     = True
+    _hop_count_input = str(visual_state.get_chain_length())
+
+
 def key_pressed(k=None) -> None:
     # Accept k from py5canvas (current key, always fresh).
     # The global `key` is one frame stale due to when update_globals() runs.
     global _should_close, _target_scroll, _scroll_y, _follow_mode
     global _hop_count_input, _chain_started
     k = k if k is not None else key
-    if k in ("q", "Q", "\x1b"):
-        _should_close = True
-        if not _chain_started:
-            visual_state.request_quit()
-    elif k in ("f", "F"):
+
+    # ── Global keys (always active) ──────────────────────────────────────────
+    if k in ("f", "F"):
         _follow_mode = not _follow_mode
-    elif k == " " and not _chain_started:
-        _chain_started = True
-        n = max(1, min(999, int(_hop_count_input))) if _hop_count_input else 5
-        visual_state.request_start(n)
-    elif k.isdigit() and not _chain_started:
-        raw = _hop_count_input + k
-        # strip leading zeros; keep at most 3 digits
-        _hop_count_input = str(int(raw))[:3] if raw else k
-    elif k == "BACKSPACE" and not _chain_started:
-        _hop_count_input = _hop_count_input[:-1]
-    elif k == "DOWN":
+        return
+
+    # ── Pre-chain (standby) ──────────────────────────────────────────────────
+    if not _chain_started:
+        if k in ("q", "Q", "\x1b"):
+            _should_close = True
+            visual_state.request_quit()
+        elif k == " ":
+            _chain_started = True
+            n = max(1, min(999, int(_hop_count_input))) if _hop_count_input else 5
+            visual_state.request_start(n)
+        elif k.isdigit():
+            raw = _hop_count_input + k
+            _hop_count_input = str(int(raw))[:3] if raw else k
+        elif k == "BACKSPACE":
+            _hop_count_input = _hop_count_input[:-1]
+
+    # ── Print prompt ─────────────────────────────────────────────────────────
+    elif visual_state.is_print_decided() is False:
+        if k in ("p", "P"):
+            visual_state.request_print(True)
+        elif k in ("n", "N"):
+            visual_state.request_print(False)
+
+    # ── Next-action prompt (after print decision) ────────────────────────────
+    elif not visual_state.is_next_action_decided():
+        if k in ("r", "R"):
+            _reset_visuals()
+            visual_state.request_next_action("reset")
+        elif k in ("q", "Q", "\x1b"):
+            _should_close = True
+            visual_state.request_next_action("quit")
+
+    # ── Scroll keys (active whenever chain has started) ──────────────────────
+    if k == "DOWN":
         _follow_mode = False
         _scroll_y += _SCROLL_STEP
         _target_scroll = _scroll_y

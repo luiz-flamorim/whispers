@@ -12,16 +12,20 @@ if str(_here) not in sys.path:
 try:
     from visual_state import (configure_hops, hop_start, hop_stop, log as _vlog,
                                set_chain_length, wait_for_start, get_chain_length,
-                               set_recording)
+                               set_recording, wait_for_print_decision,
+                               wait_for_next_action, reset as reset_state)
 except ImportError:
-    configure_hops    = None
-    hop_start         = None
-    hop_stop          = None
-    _vlog             = None
-    set_chain_length  = None
-    wait_for_start    = None
-    get_chain_length  = None
-    set_recording     = None
+    configure_hops          = None
+    hop_start               = None
+    hop_stop                = None
+    _vlog                   = None
+    set_chain_length        = None
+    wait_for_start          = None
+    get_chain_length        = None
+    set_recording           = None
+    wait_for_print_decision = None
+    wait_for_next_action    = None
+    reset_state             = None
 
 
 def _log(msg: str) -> None:
@@ -101,27 +105,13 @@ def _build_hop_sequence(relay_names: list, chain_length: int) -> list:
 
 
 def main() -> None:
-    # Set the default hop count before the window opens so the UI shows it.
     if set_chain_length is not None:
         set_chain_length(CHAIN_LENGTH)
 
     if start_visuals is not None:
         start_visuals()
 
-    # Wait for the user to press SPACE; they may adjust the hop count first.
-    chain_length = CHAIN_LENGTH
-    if wait_for_start is not None:
-        result = wait_for_start()
-        if result is None:
-            if stop_visuals is not None:
-                stop_visuals()
-            sys.exit(0)
-        chain_length = result
-
-    hop_sequence = _build_hop_sequence([name for name, _ in RELAYS], chain_length)
-    if configure_hops is not None:
-        configure_hops(hop_sequence)
-
+    # ── Load once, reuse across all runs ─────────────────────────────────────
     _log("Loading relays…")
     try:
         loaded_relays = _load_relays()
@@ -131,7 +121,7 @@ def main() -> None:
         if stop_visuals is not None:
             stop_visuals()
         sys.exit(1)
-    _log(f"Relays loaded. Chain: {chain_length} hops across {len(RELAYS)} models.")
+    _log(f"{len(RELAYS)} relay models loaded.")
 
     _log("Loading STT…")
     try:
@@ -141,56 +131,96 @@ def main() -> None:
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
-    _log("Ready. Speak now…")
-    if set_recording is not None:
-        set_recording(True)
-    try:
-        text = transcribe_once()
-    except ImportError as e:
-        _log(f"Error: Missing dependency. {e}")
-        print(str(e), file=sys.stderr)
-        sys.exit(1)
-    except RuntimeError as e:
-        _log(f"Error: Recording failed. {e}")
-        print(str(e), file=sys.stderr)
-        sys.exit(1)
-    except ValueError as e:
-        _log(f"Error: Transcription failed. {e}")
-        print(str(e), file=sys.stderr)
-        sys.exit(1)
-    finally:
+    _log("Ready — press SPACE to start.")
+
+    # ── Run loop ──────────────────────────────────────────────────────────────
+    while True:
+
+        # 1. Wait for the user to press SPACE.
+        chain_length = CHAIN_LENGTH
+        if wait_for_start is not None:
+            result = wait_for_start()
+            if result is None:      # user pressed Q before starting
+                break
+            chain_length = result
+
+        hop_sequence = _build_hop_sequence([name for name, _ in RELAYS], chain_length)
+        if configure_hops is not None:
+            configure_hops(hop_sequence)
+        _log(f"Chain: {chain_length} hops across {len(RELAYS)} models.")
+
+        # 2. Record and transcribe.
+        _log("Ready. Speak now…")
         if set_recording is not None:
-            set_recording(False)
+            set_recording(True)
+        try:
+            text = transcribe_once()
+        except (ImportError, RuntimeError, ValueError) as e:
+            _log(f"Error: {e}")
+            print(str(e), file=sys.stderr)
+            sys.exit(1)
+        finally:
+            if set_recording is not None:
+                set_recording(False)
 
-    _log(f"Transcript: {text[:100]}")
-    _log(f"Starting chain ({chain_length} hops)…")
+        _log(f"Transcript: {text[:100]}")
+        _log(f"Starting chain ({chain_length} hops)…")
 
-    try:
-        for hop_idx, relay_name in enumerate(hop_sequence):
-            hop_id = f"hop_{hop_idx + 1:02d}"
-            next_relay = hop_sequence[hop_idx + 1] if hop_idx + 1 < len(hop_sequence) else "END"
-            relay_fn, extra_prompt = loaded_relays[relay_name]
-            effective_prompt = RELAY_SYSTEM_PROMPT + (" " + extra_prompt if extra_prompt else "")
+        # 3. Run the relay chain.
+        try:
+            for hop_idx, relay_name in enumerate(hop_sequence):
+                hop_id     = f"hop_{hop_idx + 1:02d}"
+                next_relay = hop_sequence[hop_idx + 1] if hop_idx + 1 < len(hop_sequence) else "END"
+                relay_fn, extra_prompt = loaded_relays[relay_name]
+                effective_prompt = RELAY_SYSTEM_PROMPT + (" " + extra_prompt if extra_prompt else "")
 
-            received_text = text
-            if hop_start is not None:
-                hop_start(hop_id, relay_name, text)
-            text = relay_fn(text, effective_prompt)
-            if hop_stop is not None:
-                hop_stop(hop_id, relay_name, text, next_relay)
-            chain_log.add_hop(hop_idx, relay_name, received_text, text)
+                received_text = text
+                if hop_start is not None:
+                    hop_start(hop_id, relay_name, text)
+                text = relay_fn(text, effective_prompt)
+                if hop_stop is not None:
+                    hop_stop(hop_id, relay_name, text, next_relay)
+                chain_log.add_hop(hop_idx, relay_name, received_text, text)
 
-    except Exception as e:
-        _log(f"Error: Relay LLM failed. {e}")
-        print(str(e), file=sys.stderr)
-        if stop_visuals is not None:
-            stop_visuals()
-        sys.exit(1)
+        except Exception as e:
+            _log(f"Error: Relay LLM failed. {e}")
+            print(str(e), file=sys.stderr)
+            if stop_visuals is not None:
+                stop_visuals()
+            sys.exit(1)
 
-    _log("Chain complete.")
-    csv_path = chain_log.save_csv()
-    _log(f"Saved: {csv_path.name}")
-    _register_log_in_viewer(csv_path.name)
+        # 4. Save and register.
+        _log("Chain complete.")
+        csv_path = chain_log.save_csv()
+        _log(f"Saved: {csv_path.name}")
+        _register_log_in_viewer(csv_path.name)
+
+        # 5. Print prompt.
+        if wait_for_print_decision is not None:
+            _log("Print receipt? Press P = yes   N = no")
+            if wait_for_print_decision():
+                _log("Printing…")
+                try:
+                    from pos_printer import print_receipt
+                    print_receipt(csv_path)
+                    _log("Printed.")
+                except Exception as e:
+                    _log(f"Print failed: {e}")
+            else:
+                _log("Print skipped.")
+
+        # 6. Run-again or quit prompt.
+        if wait_for_next_action is not None:
+            _log("R = run again   Q = quit")
+            action = wait_for_next_action()
+            if action == "quit":
+                break
+            # "reset": clear state and loop back for another run.
+            chain_log.reset()
+            if reset_state is not None:
+                reset_state()
+        else:
+            break   # no visual layer — exit after one run
 
     if stop_visuals is not None:
         stop_visuals()

@@ -10,6 +10,10 @@ _chain_length  = 5     # hop count; set by main.py via set_chain_length()
 _start_event   = Event()  # set when user presses SPACE
 _quit_event    = Event()  # set when user presses Q/Esc before the chain starts
 _recording     = False  # True while transcribe_once() is active
+_print_event       = Event()  # set when user makes a print decision (P or N)
+_print_wanted      = False    # True if user pressed P
+_next_action_event = Event()  # set when user presses R or Q after chain completes
+_next_action: str | None = None  # "reset" or "quit"
 
 
 def _now_str() -> str:
@@ -140,6 +144,62 @@ def set_recording(active: bool) -> None:
 def is_recording() -> bool:
     with _lock:
         return _recording
+
+
+def request_print(want: bool) -> None:
+    """Called from visuals when the user presses P (want=True) or N/Esc (want=False)."""
+    global _print_wanted
+    with _lock:
+        _print_wanted = want
+    _print_event.set()
+
+
+def wait_for_print_decision() -> bool:
+    """Block main.py until the user decides. Returns True if they want to print."""
+    _print_event.wait()
+    with _lock:
+        return _print_wanted
+
+
+def is_print_decided() -> bool:
+    """True once the user has pressed P or N after the chain finishes."""
+    return _print_event.is_set()
+
+
+def request_next_action(action: str) -> None:
+    """Called from visuals when the user presses R (reset) or Q (quit) after completion."""
+    global _next_action
+    with _lock:
+        _next_action = action
+    _next_action_event.set()
+
+
+def is_next_action_decided() -> bool:
+    """True once the user has pressed R or Q after the print prompt."""
+    return _next_action_event.is_set()
+
+
+def wait_for_next_action() -> str:
+    """Block main.py until user decides to reset or quit. Returns 'reset' or 'quit'."""
+    _next_action_event.wait()
+    with _lock:
+        return _next_action or "quit"
+
+
+def reset() -> None:
+    """Clear all run-specific state so the loop can start a fresh chain."""
+    global _hop_order, _hop_state, _log_lines, _recording, _print_wanted, _next_action
+    with _lock:
+        _hop_order    = []
+        _hop_state    = {}
+        _log_lines    = []
+        _recording    = False
+        _print_wanted = False
+        _next_action  = None
+    _start_event.clear()
+    _quit_event.clear()
+    _print_event.clear()
+    _next_action_event.clear()
 
 
 def snapshot() -> tuple[list[str], dict]:

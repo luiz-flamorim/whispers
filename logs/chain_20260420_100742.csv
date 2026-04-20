@@ -1,0 +1,20 @@
+time,relay,order,received,sent
+2026-04-20 10:05:59,relay_03_stablelm_zephyr,0,I want to have breakfast now.,"Message received: ""I want to have breakfast now.""
+Rephrased: ""Someone wants to eat breakfast at this time."""
+2026-04-20 10:06:07,relay_01_qwen,1,"Message received: ""I want to have breakfast now.""
+Rephrased: ""Someone wants to eat breakfast at this time.""",Someone expresses a desire to have breakfast soon.
+2026-04-20 10:06:12,relay_05_stablelm,2,Someone expresses a desire to have breakfast soon.,"Soon, someone wants to have breakfast."
+2026-04-20 10:06:19,relay_03_stablelm_zephyr,3,"Soon, someone wants to have breakfast.",A future message may announce plans to eat together soon.
+2026-04-20 10:06:25,relay_05_stablelm,4,A future message may announce plans to eat together soon.,"In the future, someone may invite you for a meal."
+2026-04-20 10:06:32,relay_01_qwen,5,"In the future, someone may invite you for a meal.",Someone may be invited for a meal in the future.
+2026-04-20 10:06:37,relay_02_smol,6,Someone may be invited for a meal in the future.,Person will be invited for a meal in the future.
+2026-04-20 10:06:43,relay_05_stablelm,7,Person will be invited for a meal in the future.,"In the future, they will be invited for a meal."
+2026-04-20 10:06:48,relay_02_smol,8,"In the future, they will be invited for a meal.","In the future, they will be invited for a meal."
+2026-04-20 10:06:57,relay_03_stablelm_zephyr,9,"In the future, they will be invited for a meal.","The message to be relayed next: ""They have been invited to have dinner with others."""
+2026-04-20 10:07:02,relay_05_stablelm,10,"The message to be relayed next: ""They have been invited to have dinner with others.""",Nachbarn laden zum Essen eingeladen.
+2026-04-20 10:07:07,relay_01_qwen,11,Nachbarn laden zum Essen eingeladen.,Neighbors invited for dinner.
+2026-04-20 10:07:11,relay_02_smol,12,Neighbors invited for dinner.,You're being invited over for dinner.
+2026-04-20 10:07:18,relay_01_qwen,13,You're being invited over for dinner.,An invitation for dinner is extended.
+2026-04-20 10:07:29,relay_04_phi,14,An invitation for dinner is extended.,A dinner invitation has been made.
+2026-04-20 10:07:35,relay_03_stablelm_zephyr,15,A dinner invitation has been made.,A dinner invitation has been offered.
+2026-04-20 10:07:42,relay_04_phi,16,A dinner invitation has been offered.,A dinner invitation was extended.

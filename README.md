@@ -19,6 +19,7 @@ Feel free to fork it and build your own chain, following the requirements and in
 - [Voice capture (speech-to-text)](#voice-capture-speech-to-text)
 - [Relays (LLMs)](#relays-llms)
 - [Log viewer](#log-viewer)
+- [POS printer](#pos-printer)
 - [Installation](#installation)
 - [Setup](#setup)
 - [Rebuilding the environment](#rebuilding-the-environment)
@@ -135,9 +136,39 @@ After each run the log filename is automatically added to the viewer's file list
 Also hosted on GitHub Pages: [luiz-flamorim.github.io/whispers/log-viewer](https://luiz-flamorim.github.io/whispers/log-viewer/)
 
 
+## POS printer
+
+`src/pos_printer.py` prints a chain log as a receipt on any ESC/POS-compatible thermal printer. The printer connects via the Windows print spooler (`Win32Raw`) — no driver swap or COM port required as long as a test page prints correctly from Settings.
+
+**After a chain run.** When the chain finishes, the visual window shows a prompt at the bottom:
+
+```
+Print receipt?   P = yes   N = no
+```
+
+Press **P** to print the log that was just saved, or **N** to skip. The receipt shows the original input and each relay's output in order, separated by a dot line.
+
+**Browse and print past logs from the terminal:**
+
+```bash
+python src/pos_printer.py             # prints the most recent log
+python src/pos_printer.py --browse    # lists all saved logs; enter a number to print
+```
+
+The `--browse` flag lists all `logs/chain_*.csv` files newest-first. Enter the number next to any run and it prints immediately.
+
+Configure printer name, paper width, and divider style at the top of `src/pos_printer.py`:
+
+```python
+WIN32_PRINTER_NAME = "POS CV2"   # name shown in Settings → Printers & scanners
+LINE_WIDTH         = 42          # characters per line (42 for 80 mm, 32 for 58 mm)
+DIVIDER_CHAR       = ":"         # character repeated to form header/footer lines
+```
+
+
 ## Installation
 
-The **Installation** has been built for an interactive art installation, where the audience can interact with the sentences.
+The **Installation** has been built for an interactive art installation, where the audience can interact with the sentences. This is still a unfinished work, as I feel like the [POS printer](#pos-printer) works better as an art installation.
 
 A browser-based interactive canvas (`installation/`) built with [p5.js](https://p5js.org/). It reads the same chain log CSVs and renders all hops as a single continuous justified paragraph. Moving the mouse over the text highlights the hop beneath the cursor and speaks it aloud using the browser's built-in speech synthesis — no plugins or cloud services required.
 
@@ -182,6 +213,20 @@ python -m pip install -r requirements.txt
 # Journal
 
 Click to expand and see details.
+
+<details>
+
+<summary>19/04/2026: POS thermal printer integration.</summary>
+
+Added `src/pos_printer.py` — a standalone module that reads a chain log CSV and prints a formatted receipt on an ESC/POS thermal printer. The printer is a POS-style unit connected over USB and accessed through the Windows print spooler via `python-escpos`'s `Win32Raw` backend, requiring no COM port or libusb driver swap.
+
+The receipt format lists the original input at the top, followed by each relay's output in hop order, with a full-width dot separator between them. Layout constants (`LINE_WIDTH`, `DIVIDER_CHAR`) are declared once at the top of the file for easy adjustment to different paper widths.
+
+Two usage paths were added. After a chain run, the visual window shows a one-line prompt — **P** to print, **N** to skip — implemented using the same `Event`-based pattern as the existing SPACE-to-start handshake between `main.py` and `visual_state.py`. The prompt is drawn as a slim bar at the bottom of the window and disappears once a decision is made. For reviewing older runs, `pos_printer.py --browse` lists all saved logs newest-first in the terminal and prints whichever the user selects by number.
+
+A `p.close()` call was required after sending the print job; without it, `Win32Raw` holds the Windows print document open and the job is only dispatched when the Python process exits.
+
+</details>
 
 <details>
 

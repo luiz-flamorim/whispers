@@ -60,6 +60,14 @@ def _text_colour(status: str, all_finished: bool) -> tuple:
     return _GREEN_DIM
 
 
+def _on_framebuffer_resize(window, w: int, h: int) -> None:
+    """Fires when the GL framebuffer actually changes size (including top/left drags)."""
+    global _WIN_W, _WIN_H
+    if w > 0 and h > 0:
+        _WIN_W, _WIN_H = w, h
+        size(w, h)
+
+
 def setup() -> None:
     global _WIN_W, _WIN_H, _hop_count_input
     monitor = glfw.get_primary_monitor()
@@ -68,6 +76,7 @@ def setup() -> None:
     _WIN_H  = vm.size.height
     size(_WIN_W, _WIN_H)
     glfw.set_window_attrib(sketch.window, glfw.RESIZABLE, glfw.TRUE)
+    glfw.set_framebuffer_size_callback(sketch.window, _on_framebuffer_resize)
     text_size(13)
     text_font(create_font("Consolas", 13))
     _hop_count_input = str(visual_state.get_chain_length())

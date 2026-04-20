@@ -15,6 +15,7 @@ Feel free to fork it and build your own chain, following the requirements and in
 
 ## Contents
 
+- [Project structure](#project-structure)
 - [How to run the LLM game](#how-to-run-the-llm-game)
 - [Voice capture (speech-to-text)](#voice-capture-speech-to-text)
 - [Relays (LLMs)](#relays-llms)
@@ -24,6 +25,41 @@ Feel free to fork it and build your own chain, following the requirements and in
 - [Setup](#setup)
 - [Rebuilding the environment](#rebuilding-the-environment)
 - [Journal](#journal)
+
+## Project structure
+
+```
+whisper_chain/
+├── src/
+│   ├── main.py                       # Orchestrator: loads relays, runs the chain
+│   ├── visual_state.py               # Thread-safe shared state for the visual layer
+│   ├── visuals.py                    # py5canvas renderer (phosphor-green GUI)
+│   ├── stt.py                        # Microphone recording + Whisper transcription
+│   ├── chain_log.py                  # CSV logging module
+│   ├── pos_printer.py                # ESC/POS thermal printer integration
+│   ├── relay_01_qwen.py              # Relay: Qwen2.5-3B-Instruct
+│   ├── relay_02_smol.py              # Relay: SmolLM2-1.7B-Instruct
+│   ├── relay_03_stablelm_zephyr.py   # Relay: StableLM-Zephyr-3B
+│   ├── relay_04_phi.py               # Relay: Phi-3-mini-4k-instruct
+│   └── relay_05_stablelm.py          # Relay: StableLM-2-1.6B-Chat
+├── log-viewer/
+│   ├── index.html                    # Browser-based log viewer UI
+│   ├── app.js                        # Log viewer logic + auto-registered file list
+│   └── style.css                     # Viewer styles
+├── installation/
+│   ├── index.html                    # Interactive canvas installation
+│   ├── sketch.js                     # p5.js sketch (justified paragraph + speech)
+│   ├── menu.js                       # Log file selector menu
+│   ├── loader.js                     # Auto-registered log file list
+│   └── fonts/
+│       └── CutiveMono-Regular.ttf
+├── logs/
+│   └── chain_YYYYMMDD_HHMMSS.csv    # One CSV per run (auto-generated)
+├── scripts/
+│   └── download_model.py             # Pre-downloads all relay models
+├── requirements.txt
+└── README.md
+```
 
 ## How to run the LLM game
 

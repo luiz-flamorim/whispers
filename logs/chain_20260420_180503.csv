@@ -1,0 +1,6 @@
+time,relay,order,received,sent
+2026-04-20 18:04:23,relay_01_qwen,0,Sky is blue.,The sky appears blue.
+2026-04-20 18:04:36,relay_04_phi,1,The sky appears blue.,The individual mentioned observing the sky's color.
+2026-04-20 18:04:46,relay_05_stablelm,2,The individual mentioned observing the sky's color.,The person observed the sky's vibrant color.
+2026-04-20 18:04:56,relay_03_stablelm_zephyr,3,The person observed the sky's vibrant color.,"The message has been received and rephrased as ""The sender saw a colorful sky."""
+2026-04-20 18:05:03,relay_01_qwen,4,"The message has been received and rephrased as ""The sender saw a colorful sky.""",Someone said the sky appeared colorful.

@@ -252,6 +252,18 @@ Click to expand and see details.
 
 <details>
 
+<summary>20/04/2026: Relay memory management — explicit load/unload per hop.</summary>
+
+During a 100-hop run the weights-loading speed degraded sharply mid-chain, dropping from ~300–800 it/s down to ~15–50 it/s, roughly 10–50× slower. `accelerate` emitted `"Some parameters are on the meta device because they were offloaded to the disk and cpu."` warnings. Root cause: every relay module called `load_model()` inside `relay()` with no corresponding unload, so each hop added a model to VRAM without ever freeing it. After ~15 hops the GPU was exhausted, `accelerate` started spilling layers to disk, and all subsequent loads had to page weights in and out over disk I/O.
+
+**First attempt — session-level caching.** Each relay cached its `(tokenizer, model)` pair in module-level globals so models loaded once and were reused across all hops. This solved the accumulation problem but introduced a new one: the five models together (~26 GB in fp16) exceed the GPU's VRAM. With all of them resident simultaneously, `accelerate` offloaded the overflow to CPU and disk — which makes every inference call on those layers slow, not just loading. The chain ran slower than before.
+
+**Final approach — load, infer, unload.** Each `relay()` call now loads its model, runs inference inside a `try` block, then explicitly `del model, tokenizer` and calls `torch.cuda.empty_cache()` in the `finally` block. Because only one model occupies VRAM at a time and is fully released before the next one loads, every model fits entirely in VRAM and inference runs at full GPU speed. Loading from disk per hop adds a small constant overhead (~1–2 s), but this is shorter and more consistent than the offload penalty. `device_map` was also changed from `"auto"` to `"cuda"` (with a CPU fallback) so `accelerate` never silently spills to disk. `torch_dtype` was updated to `dtype` to resolve the deprecation warning.
+
+</details>
+
+<details>
+
 <summary>19/04/2026: POS thermal printer integration.</summary>
 
 Added `src/pos_printer.py` — a standalone module that reads a chain log CSV and prints a formatted receipt on an ESC/POS thermal printer. The printer is a POS-style unit connected over USB and accessed through the Windows print spooler via `python-escpos`'s `Win32Raw` backend, requiring no COM port or libusb driver swap.

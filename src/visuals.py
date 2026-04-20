@@ -12,6 +12,7 @@ _target_scroll   = 0.0    # scroll target (used during auto-follow)
 _follow_mode     = True   # True = auto-follow active hop; False = user is in control
 _hop_count_input = "5"    # editable hop count string (updated in setup)
 _chain_started   = False  # True once user presses SPACE
+_hop_tops        = {}     # hop_id -> scroll-space y, updated each frame from real rendered positions
 
 # Phosphor green palette
 _GREEN_BRIGHT  = (51, 255, 51)    # active hop / all-done
@@ -320,18 +321,18 @@ def _draw_row(hop_id: str, hop_data: dict, y: float, all_finished: bool) -> floa
 
 
 def _find_active_y(hop_order: list, hop_state: dict) -> float:
-    """Return the scroll-space y of the currently running hop (0 = top of relay area)."""
-    y = 0.0
+    """Return the scroll-space y of the currently running hop using cached real positions."""
     for hop_id in hop_order:
-        data = hop_state.get(hop_id, {})
-        if data.get("status") == "running":
-            return y
-        y += 160
-    return y
+        if hop_state.get(hop_id, {}).get("status") == "running":
+            return _hop_tops.get(hop_id, 0.0)
+    return 0.0
 
 
 def draw() -> None:
-    global _is_running, _scroll_y, _target_scroll, _follow_mode, _hop_count_input, _chain_started
+    global _is_running, _scroll_y, _target_scroll, _follow_mode, _hop_count_input, _chain_started, _hop_tops
+
+    if visual_state.consume_retry():
+        _reset_visuals()
 
     hop_order, hop_state = visual_state.snapshot()
     log_lines            = visual_state.get_log()
@@ -354,13 +355,16 @@ def draw() -> None:
 
         content_start = _FIXED_H + 16
         y = content_start - _scroll_y
+        new_hop_tops = {}
         for hop_id in hop_order:
+            new_hop_tops[hop_id] = y + _scroll_y - content_start
             hop_data = hop_state.get(hop_id, {
                 "relay": "-", "status": "waiting",
                 "start": "-", "received": "-",
                 "emitted": "-", "next": "-", "stop": "-",
             })
             y = _draw_row(hop_id, hop_data, y, finished)
+        _hop_tops = new_hop_tops
         total_content_h = (y + _scroll_y) - content_start
 
     # --- Fixed panels drawn on top ---
@@ -481,9 +485,9 @@ def key_pressed(k=None) -> None:
         _target_scroll = _scroll_y
     elif k == "PAGE_DOWN":
         _follow_mode = False
-        _scroll_y += _WIN_H * 0.8
+        _scroll_y += (_WIN_H - _FIXED_H) * 0.8
         _target_scroll = _scroll_y
     elif k == "PAGE_UP":
         _follow_mode = False
-        _scroll_y = max(0.0, _scroll_y - _WIN_H * 0.8)
+        _scroll_y = max(0.0, _scroll_y - (_WIN_H - _FIXED_H) * 0.8)
         _target_scroll = _scroll_y

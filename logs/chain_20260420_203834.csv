@@ -1,0 +1,9 @@
+time,relay,order,received,sent
+2026-04-20 20:37:45,relay_05_stablelm,0,I need to do the dishes.,Clean the dishes.
+2026-04-20 20:37:52,relay_01_qwen,1,Clean the dishes.,Dishes need cleaning.
+2026-04-20 20:37:56,relay_02_smol,2,Dishes need cleaning.,"""Dishes need cleaning."""
+2026-04-20 20:38:06,relay_04_phi,3,"""Dishes need cleaning.""",Someone mentioned the need to clean the dishes.
+2026-04-20 20:38:13,relay_01_qwen,4,Someone mentioned the need to clean the dishes.,The mention was of the necessity to clean dishes.
+2026-04-20 20:38:18,relay_05_stablelm,5,The mention was of the necessity to clean dishes.,"Pass: In order to maintain cleanliness, it's important to clean dishes."
+2026-04-20 20:38:22,relay_02_smol,6,"Pass: In order to maintain cleanliness, it's important to clean dishes.","""Clean dishes are vital for maintaining cleanliness."""
+2026-04-20 20:38:34,relay_03_stablelm_zephyr,7,"""Clean dishes are vital for maintaining cleanliness.""","The message ""Clean dishes are vital for maintaining cleanliness."" must be passed on to the next relay as is, without any rephrase or comment."

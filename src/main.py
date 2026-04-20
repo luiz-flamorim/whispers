@@ -13,7 +13,8 @@ try:
     from visual_state import (configure_hops, hop_start, hop_stop, log as _vlog,
                                set_chain_length, wait_for_start, get_chain_length,
                                set_recording, wait_for_print_decision,
-                               wait_for_next_action, reset as reset_state)
+                               wait_for_next_action, reset as reset_state,
+                               request_retry)
 except ImportError:
     configure_hops          = None
     hop_start               = None
@@ -26,6 +27,7 @@ except ImportError:
     wait_for_print_decision = None
     wait_for_next_action    = None
     reset_state             = None
+    request_retry           = None
 
 
 def _log(msg: str) -> None:
@@ -155,7 +157,15 @@ def main() -> None:
             set_recording(True)
         try:
             text = transcribe_once()
-        except (ImportError, RuntimeError, ValueError) as e:
+        except ValueError:
+            chain_log.reset()
+            if reset_state is not None:
+                reset_state()
+            _log("No speech detected — press SPACE to try again.")
+            if request_retry is not None:
+                request_retry()
+            continue
+        except (ImportError, RuntimeError) as e:
             _log(f"Error: {e}")
             print(str(e), file=sys.stderr)
             sys.exit(1)
@@ -219,6 +229,7 @@ def main() -> None:
             chain_log.reset()
             if reset_state is not None:
                 reset_state()
+            _log("Ready — press SPACE to start.")
         else:
             break   # no visual layer — exit after one run
 

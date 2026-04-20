@@ -14,6 +14,7 @@ _print_event       = Event()  # set when user makes a print decision (P or N)
 _print_wanted      = False    # True if user pressed P
 _next_action_event = Event()  # set when user presses R or Q after chain completes
 _next_action: str | None = None  # "reset" or "quit"
+_retry_flag    = False  # one-shot: set by main.py on empty transcript, consumed by visuals
 
 
 def _now_str() -> str:
@@ -205,3 +206,20 @@ def reset() -> None:
 def snapshot() -> tuple[list[str], dict]:
     with _lock:
         return list(_hop_order), {k: dict(v) for k, v in _hop_state.items()}
+
+
+def request_retry() -> None:
+    """Signal the visual layer to return to standby after a failed transcription."""
+    global _retry_flag
+    with _lock:
+        _retry_flag = True
+
+
+def consume_retry() -> bool:
+    """Called each frame by visuals. Returns True once (clears the flag) when a retry was requested."""
+    global _retry_flag
+    with _lock:
+        if _retry_flag:
+            _retry_flag = False
+            return True
+        return False

@@ -1,0 +1,9 @@
+time,relay,order,received,sent
+2026-04-20 21:21:46,relay_01_qwen,0,Burs fly through the sky.,Burs move through the air as they fly.
+2026-04-20 21:21:51,relay_05_stablelm,1,Burs move through the air as they fly.,"As they fly, burs move through the air."
+2026-04-20 21:21:58,relay_03_stablelm_zephyr,2,"As they fly, burs move through the air.",Burs move swiftly through the air as they fly.
+2026-04-20 21:22:04,relay_05_stablelm,3,Burs move swiftly through the air as they fly.,"Quickly dart through the air, these are flying burs."
+2026-04-20 21:22:08,relay_02_smol,4,"Quickly dart through the air, these are flying burs.","""Quickly dart through the air, these are flying burs."""
+2026-04-20 21:22:19,relay_04_phi,5,"""Quickly dart through the air, these are flying burs.""",Someone mentioned flying burs that move swiftly through the air.
+2026-04-20 21:22:23,relay_02_smol,6,Someone mentioned flying burs that move swiftly through the air.,A person noted moving fast flying bugs in the air.
+2026-04-20 21:22:30,relay_03_stablelm_zephyr,7,A person noted moving fast flying bugs in the air.,Someone observed fast-moving flying bugs in the air.

@@ -1,0 +1,9 @@
+time,relay,order,received,sent
+2026-04-23 14:25:26,relay_01_qwen,0,Today is a sunny day.,It is reported to be a bright and clear day today.
+2026-04-23 14:25:33,relay_03_stablelm_zephyr,1,It is reported to be a bright and clear day today.,The weather is reportedly sunny and clear today.
+2026-04-23 14:25:38,relay_02_smol,2,The weather is reportedly sunny and clear today.,A report indicates today's weather is sunny and clear.
+2026-04-23 14:25:45,relay_01_qwen,3,A report indicates today's weather is sunny and clear.,Today's weather report shows sunshine and clarity.
+2026-04-23 14:25:55,relay_04_phi,4,Today's weather report shows sunshine and clarity.,The forecast indicates sunny and clear weather conditions today.
+2026-04-23 14:26:03,relay_01_qwen,5,The forecast indicates sunny and clear weather conditions today.,Today's forecast shows sunny and clear weather conditions.
+2026-04-23 14:26:13,relay_04_phi,6,Today's forecast shows sunny and clear weather conditions.,The weather today is expected to be bright with no clouds in sight.
+2026-04-23 14:26:24,relay_05_stablelm,7,The weather today is expected to be bright with no clouds in sight.,"The sky is clear today, according to the forecast."

@@ -7,19 +7,34 @@ TEMPERATURE        = 0.7
 RELAY_EXTRA_PROMPT = "Always write your reply in English. Output exactly one sentence. Do not ask questions. Do not switch to another language under any circumstances."
 
 
+import gc
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def relay(input_text: str, system_prompt: str) -> str:
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME,
-        dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-        device_map="cuda" if torch.cuda.is_available() else "cpu",
-    )
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
+    max_memory = None
+    if torch.cuda.is_available():
+        free_vram, _ = torch.cuda.mem_get_info(0)
+        max_memory = {0: int(free_vram * 0.90), "cpu": "32GiB"}
+
+    tokenizer = None
+    model = None
+    inputs = None
+    outputs = None
     try:
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(
+            MODEL_NAME,
+            dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            device_map="auto",
+            max_memory=max_memory,
+        )
+
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text}
@@ -49,7 +64,8 @@ def relay(input_text: str, system_prompt: str) -> str:
             skip_special_tokens=True
         )
     finally:
-        del model, tokenizer
+        del inputs, outputs, model, tokenizer
+        gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 

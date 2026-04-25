@@ -1,6 +1,6 @@
-# Whisper Chain
+# Whispers
 
-**Whisper Chain** is an inference experiment based on *Chinese Whispers* (also known as *Broken Telephone*). In the game, players line up, the first person whispers a phrase into the next player's ear, and the message travels down the chain until the last person reveals what they heard. The result is usually funny, as the message often ends up completely different from what started.
+**Whispers** is an inference experiment based on [*Telephone Game*](https://en.wikipedia.org/wiki/Telephone_game) (also known as *Broken Telephone*). In the game, players line up, the first person whispers a phrase into the next player's ear, and the message travels down the chain until the last person reveals what they heard. The result is usually funny, as the message often ends up completely different from what started.
 
 This project does the same, but with LLMs instead of people. Each model receives the message and rephrases it in its own words before passing it on as a pure inference step. The user controls only a few parameters, but the number of hops has the biggest impact; fewer hops produce subtle changes, while more hops lead to increasingly odd results.
 
